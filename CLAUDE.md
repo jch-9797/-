@@ -5,3 +5,4 @@
 - 모든 결과물은 한국어로 쓴다. 스킬의 영어 예시는 구조만 참고한다.
 - 모든 릴스 대본에 첫 2초 3중 후킹(비주얼·청각·제목)을 넣는다. 자세한 규칙은 `brand/voice.md`.
 - 로고·색상은 `brand/README.md`를 따른다.
+- 업로드 기록은 `~/.claude/instagram/log.md` 대신 `brand/log.md`에 남긴다.
