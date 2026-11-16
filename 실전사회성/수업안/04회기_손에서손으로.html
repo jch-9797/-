@@ -1,0 +1,274 @@
+<title>4회기 손에서 손으로</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* 레이아웃: 왼쪽에 분 단위 시간 눈금, 오른쪽에 수업 흐름이 내려가는 한 장짜리 수업안. 컵 그림이 오늘의 목표선을 보여 준다. */
+:root{
+  --bg:#f2f6f6; --surface:#ffffff; --ink:#12313a; --muted:#566c74; --line:#d3dfe0;
+  --mint:#1b8570; --mint-soft:#dff1ec; --brick:#a8432d; --brick-soft:#f6e4de; --water:#bfe0e8;
+  --display:"Black Han Sans","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1f24; --surface:#172b31; --ink:#e6f0f0; --muted:#9bb0b5; --line:#2a4047;
+  --mint:#5cc9ae; --mint-soft:#1c3b38; --brick:#ea9079; --brick-soft:#3a2620; --water:#2f6272; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f1f24; --surface:#172b31; --ink:#e6f0f0; --muted:#9bb0b5; --line:#2a4047;
+  --mint:#5cc9ae; --mint-soft:#1c3b38; --brick:#ea9079; --brick-soft:#3a2620; --water:#2f6272; color-scheme:dark }
+
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7}
+.wrap{max-width:880px;margin:0 auto;padding-block:32px 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:40px}
+h1,h2,h3,p,ul,ol{margin:0}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,7vw,54px);line-height:1.1;text-wrap:balance}
+h2{font-family:var(--display);font-weight:400;font-size:24px;text-wrap:balance}
+h3{font-size:17px;font-weight:600}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.08em;color:var(--mint)}
+.muted{color:var(--muted)}
+
+.top{display:grid;grid-template-columns:1fr 190px;gap:24px;align-items:end}
+.top > div{min-width:0;display:flex;flex-direction:column;gap:14px}
+.facts{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0}
+.facts li{font-size:14px;padding:4px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.cup{width:100%;height:auto}
+.cup text{font-family:var(--body);font-size:11px;fill:var(--muted)}
+@media (max-width:620px){ .top{grid-template-columns:1fr} .cup{max-width:200px} }
+
+.goal{background:var(--mint-soft);border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;gap:8px}
+.goal strong{font-size:19px}
+
+section{display:flex;flex-direction:column;gap:16px}
+.flow{display:flex;flex-direction:column;border-top:2px solid var(--ink)}
+.step{display:grid;grid-template-columns:92px 1fr;gap:20px;padding:22px 0;border-bottom:1px solid var(--line)}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:10px}
+.time{font-variant-numeric:tabular-nums;font-weight:600;color:var(--mint);font-size:15px;padding-top:2px}
+.time small{display:block;font-weight:400;color:var(--muted);font-size:13px}
+.caption{font-family:var(--display);font-size:21px;line-height:1.25}
+.say{border-left:3px solid var(--brick);padding:2px 0 2px 14px;font-weight:500}
+.say span{display:block;font-size:13px;font-weight:400;color:var(--muted)}
+.step ul{padding-left:20px;display:flex;flex-direction:column;gap:4px}
+@media (max-width:520px){ .step{grid-template-columns:1fr;gap:6px} }
+
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card .then{color:var(--muted);font-size:15px}
+@media (max-width:620px){ .cards{grid-template-columns:1fr} }
+
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;background:var(--surface);font-size:15px}
+th,td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top}
+th{font-weight:600;background:var(--mint-soft)}
+td.blank{height:46px}
+
+.check{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:6px 20px}
+.check label{display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer}
+.check input{width:20px;height:20px;margin-top:3px;accent-color:var(--mint);flex:none}
+.check input:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.check small{display:block;color:var(--muted)}
+@media (max-width:520px){ .check{grid-template-columns:1fr} }
+
+.warn{background:var(--brick-soft);border-radius:12px;padding:16px 18px}
+.warn ul{padding-left:20px}
+</style>
+
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <p class="eyebrow">실전 사회성 · 센터 안 수업 · 4회기</p>
+      <h1>손에서 손으로</h1>
+      <p>지난주에는 각자 물티슈를 들고 걸었다. 이번 주에는 물티슈가 발이 아니라 손을 타고 간다. 내 손에 오려면 앞사람이 줘야 하고, 내가 줘야 뒷사람이 받는다.</p>
+      <ul class="facts">
+        <li>초등 고학년 6명</li>
+        <li>50분</li>
+        <li>난이도 2단계 · 상호 의존</li>
+        <li>바꾸는 변수 1개 · 옮기는 방법</li>
+      </ul>
+    </div>
+    <svg class="cup" viewBox="0 0 190 200" role="img" aria-label="투명 컵. 아래쪽 점선은 지난주 기록, 위쪽 실선은 오늘 목표.">
+      <path d="M52 22 L138 22 L126 178 L64 178 Z" fill="var(--surface)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M58.3 104 L131.7 104 L126 178 L64 178 Z" fill="var(--water)"/>
+      <path d="M52 22 L138 22 L126 178 L64 178 Z" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
+      <line x1="46" y1="104" x2="144" y2="104" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <line x1="46" y1="70" x2="144" y2="70" stroke="var(--brick)" stroke-width="2.5"/>
+      <text x="148" y="108">지난주</text>
+      <text x="148" y="74" style="fill:var(--brick);font-weight:600">오늘</text>
+      <text x="95" y="196" text-anchor="middle">선은 네임펜으로 컵에 직접</text>
+    </svg>
+  </header>
+
+  <div class="goal">
+    <p class="eyebrow">이번 회기에 볼 것 하나</p>
+    <strong>받을 사람을 보고 건네는가</strong>
+    <p>3회기째 그룹은 이름과 성향을 막 알아가는 때다. 눈 맞춤이나 "여기" 같은 짧은 신호가 과제 때문에 저절로 나오는지 본다. 가르치지 않는다. 나오면 적는다.</p>
+  </div>
+
+  <section>
+    <h2>50분 흐름</h2>
+    <div class="flow">
+
+      <div class="step">
+        <div class="time">0–5분<small>여는 판</small></div>
+        <div>
+          <p class="caption">지난주 컵을 꺼낸다</p>
+          <p>지난주에 채운 높이에 네임펜으로 점선을 긋고 날짜를 적는다. 그 위 손가락 두 마디쯤에 실선을 하나 더 긋는다. 선은 아이 한 명에게 긋게 한다.</p>
+          <p class="say">"오늘은 이 선이야. 근데 오늘은 걸어서 못 옮겨."<span>방법 설명은 여기까지. 30초를 넘기지 않는다.</span></p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="time">5–17분<small>1판 · 12분</small></div>
+        <div>
+          <p class="caption">물티슈 넘기기</p>
+          <ul>
+            <li>대야에서 컵까지 6명이 한 줄. 사이는 팔을 뻗으면 닿는 거리.</li>
+            <li>첫 사람이 적시고, 손에서 손으로 넘겨, 마지막 사람만 컵에 짠다.</li>
+            <li>발은 제자리. 물티슈가 바닥에 닿으면 그 장은 무효.</li>
+            <li>2분 30초마다 한 칸씩 자리 이동. 4번 돌면 적시는 자리와 짜는 자리를 거의 모두 거친다.</li>
+          </ul>
+          <p class="muted">선생님은 타이머만 누른다. 줄 순서도 아이들이 정하게 둔다. 누가 어디에 서려 하는지가 첫 관찰 거리다.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="time">17–20분<small>멈춤</small></div>
+        <div>
+          <p class="caption">질문 하나, 작전 1분</p>
+          <p class="say">"지금 제일 잘 되고 있는 게 뭐야?"<span>안 되는 것은 묻지 않는다. 답이 없으면 컵 높이만 같이 본다.</span></p>
+          <p>그다음 1분은 아이들끼리 작전 시간. 선생님은 두 걸음 물러난다.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="time">20–30분<small>2판 · 10분</small></div>
+        <div>
+          <p class="caption">세 걸음 벌리기</p>
+          <ul>
+            <li>사이를 세 걸음으로 넓힌다. 이제 던져야 닿는다.</li>
+            <li>규칙 하나 추가. 받는 사람이 "줘"라고 해야 던질 수 있다.</li>
+            <li>놓치면 줍지 않고 다음 장으로.</li>
+          </ul>
+          <p class="muted">이 규칙이 오늘의 핵심 장치다. 부르고, 보고, 던지는 순서가 과제 조건으로 들어간다. 젖은 물티슈가 얼굴에 맞는 웃긴 사고도 여기서 난다.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="time">30–42분<small>3판 · 12분</small></div>
+        <div>
+          <p class="caption">고무줄 크레인</p>
+          <ul>
+            <li>고무줄 하나에 끈 6가닥. 한 사람이 한 가닥.</li>
+            <li>다 같이 당겨 고무줄을 벌리고, 종이컵을 집어 3-2-1 피라미드로 쌓는다.</li>
+            <li>손으로 컵을 만지면 그 컵은 처음 자리로.</li>
+          </ul>
+          <p class="muted">물티슈는 한 줄로 이어진 의존이고, 크레인은 여섯 명이 동시에 맞춰야 하는 의존이다. 한 명이 세게 당기면 전부 틀어진다. 물 쓰는 활동 뒤라 손을 닦고 실내로 들어오는 전환에도 쓸 수 있다.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="time">42–50분<small>닫는 판</small></div>
+        <div>
+          <p class="caption">컵을 가운데 놓고</p>
+          <p>테이블 한가운데 컵과 피라미드를 둔다. 사람이 아니라 장면을 묻는다.</p>
+          <ul>
+            <li>"물이 제일 빨리 찼을 때 우리 뭐 하고 있었지?"</li>
+            <li>"누구한테 받을 때 제일 받기 편했어?"</li>
+            <li>"다음 주에 더 어렵게 하려면 뭘 바꿀까?"</li>
+          </ul>
+          <p class="muted">마지막 질문의 답을 받아 적어 5회기 변수로 쓴다. 아이들이 정한 규칙은 아이들이 지킨다.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>나올 법한 장면</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>한 아이가 지휘하기 시작한다</h3>
+        <p class="then">말리지 않는다. 다음 자리 이동 때 그 아이가 줄 한가운데에 오게 한다. 가운데 자리는 받고 주는 일만 할 수 있다.</p>
+      </div>
+      <div class="card">
+        <h3>"유치해요"</h3>
+        <p class="then">고학년에게는 정상 반응이다. 스톱워치와 기록판을 맡긴다. "네가 재 줘. 지난주보다 빠른지." 기록원으로 들어와서 두 번째 판에는 줄에 선다.</p>
+      </div>
+      <div class="card">
+        <h3>떨어뜨린 아이를 탓한다</h3>
+        <p class="then">사람 대신 지점을 묻는다. "몇 번째 손에서 자주 떨어지지?" 답은 대개 거리나 속도로 나온다. 그 자리 간격을 아이들이 조정하게 한다.</p>
+      </div>
+      <div class="card">
+        <h3>물티슈를 일부러 던지며 장난친다</h3>
+        <p class="then">2판을 앞당긴다. 던지는 것이 규칙 안으로 들어오면 장난이 기술이 된다. 얼굴 쪽으로 던지면 그 장만 무효.</p>
+      </div>
+      <div class="card">
+        <h3>목표선에 못 미친다</h3>
+        <p class="then">괜찮다. 도달한 높이에 선을 긋고 날짜를 쓴다. 다음 주에 깰 기록이 생긴 것이다.</p>
+      </div>
+      <div class="card">
+        <h3>한 아이가 줄 끝에만 서려 한다</h3>
+        <p class="then">자리 이동 규칙이 대신 해결한다. 선생님이 지목하지 않아도 2분 30초 뒤에는 자리가 바뀐다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>관찰 기록</h2>
+    <p class="muted">수업 직후 5분 안에, 한 아이당 한 칸만 채운다. 세 칸을 다 채우려 하면 다음 주부터 안 쓰게 된다.</p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th style="width:74px">아이</th><th>받을 사람을 보고 건넸나</th><th>남을 향한 말·행동</th><th>막혔을 때</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>가</td><td class="blank"></td><td></td><td></td></tr>
+          <tr><td>나</td><td class="blank"></td><td></td><td></td></tr>
+          <tr><td>다</td><td class="blank"></td><td></td><td></td></tr>
+          <tr><td>라</td><td class="blank"></td><td></td><td></td></tr>
+          <tr><td>마</td><td class="blank"></td><td></td><td></td></tr>
+          <tr><td>바</td><td class="blank"></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">막혔을 때 칸에는 넷 중 하나를 적는다. 그만둠, 남 탓, 다른 방법 시도, 도움 요청.</p>
+  </section>
+
+  <section>
+    <h2>준비물</h2>
+    <ul class="check" id="checklist">
+      <li><label><input type="checkbox" id="c1"><span>지난주 컵<small>기록선을 그을 컵</small></span></label></li>
+      <li><label><input type="checkbox" id="c2"><span>네임펜 1자루</span></label></li>
+      <li><label><input type="checkbox" id="c3"><span>물티슈 1팩<small>30장 이상</small></span></label></li>
+      <li><label><input type="checkbox" id="c4"><span>대야와 물</span></label></li>
+      <li><label><input type="checkbox" id="c5"><span>타이머<small>2분 30초 반복</small></span></label></li>
+      <li><label><input type="checkbox" id="c6"><span>고무줄 1개, 끈 6가닥<small>끈은 1m씩, 미리 묶어 둔다</small></span></label></li>
+      <li><label><input type="checkbox" id="c7"><span>종이컵 10개<small>6개 사용, 4개 여분</small></span></label></li>
+      <li><label><input type="checkbox" id="c8"><span>수건 2장</span></label></li>
+    </ul>
+  </section>
+
+  <section class="warn">
+    <h3>안전</h3>
+    <ul>
+      <li>1판과 2판은 발을 떼지 않는 규칙이라 지난주보다 미끄러질 일이 적다. 그래도 슬리퍼는 운동화로 갈아 신긴다.</li>
+      <li>줄은 난간과 나란히가 아니라 옥상 안쪽을 향하게 세운다. 던진 물티슈를 주우러 난간 쪽으로 가지 않게 한다.</li>
+      <li>비가 오면 복도에 수건을 깔고 1판만 실내에서 한다. 2판은 크레인을 길게 해서 대신한다.</li>
+    </ul>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  var KEY='s4-checklist', saved={};
+  try{ saved=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){}
+  document.querySelectorAll('#checklist input').forEach(function(box){
+    if(saved[box.id]) box.checked=true;
+    box.addEventListener('change',function(){
+      saved[box.id]=box.checked;
+      try{ localStorage.setItem(KEY,JSON.stringify(saved)); }catch(e){}
+    });
+  });
+})();
+</script>
