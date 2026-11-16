@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>사회성 마을</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* 한 가지 모습으로 고정한 게임 화면: 낮의 마을. 조작은 왼쪽 아래, 행동 버튼은 오른쪽 아래. */
+:root{
+  color-scheme:light;
+  --sky:#cfe9ee; --ink:#12313a; --muted:#566c74; --paper:#ffffff; --line:#d3dfe0;
+  --mint:#1b8570; --mint-soft:#dff1ec; --brick:#a8432d;
+  --display:"Black Han Sans","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --sl:max(16px,env(safe-area-inset-left,0px)); --sr:max(16px,env(safe-area-inset-right,0px));
+  --sb:max(16px,env(safe-area-inset-bottom,0px)); --st:max(12px,env(safe-area-inset-top,0px));
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--sky);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;overflow:hidden;
+  -webkit-user-select:none;user-select:none;touch-action:none}
+canvas{display:block;width:100%;height:100%}
+#stage{position:fixed;inset:0}
+h1,h2,p,ul{margin:0}
+
+.label{position:absolute;left:0;top:0;transform:translate(-50%,-100%);background:var(--paper);color:var(--ink);
+  border:2px solid var(--ink);border-radius:14px;padding:4px 12px;font-weight:600;font-size:15px;white-space:nowrap;pointer-events:none}
+
+#hud-top{position:fixed;top:var(--st);left:var(--sl);right:var(--sr);display:flex;justify-content:space-between;gap:12px;pointer-events:none}
+.pill{background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:4px 14px;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
+#home{pointer-events:auto;text-decoration:none;color:var(--ink)}
+
+#toast{position:fixed;top:calc(var(--st) + 48px);left:50%;transform:translateX(-50%);max-width:calc(100% - 32px);
+  background:var(--ink);color:var(--paper);border-radius:12px;padding:10px 18px;font-family:var(--display);font-size:20px;text-align:center}
+
+#stick{position:fixed;left:var(--sl);bottom:var(--sb);width:124px;height:124px;border-radius:50%;
+  background:rgba(255,255,255,.55);border:2px solid var(--ink);touch-action:none}
+#knob{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:var(--ink)}
+#actions{position:fixed;right:var(--sr);bottom:var(--sb);display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.act{font-family:var(--body);font-size:17px;font-weight:600;padding:14px 20px;border-radius:14px;border:2px solid var(--ink);
+  background:var(--paper);color:var(--ink);cursor:pointer;touch-action:manipulation}
+.act.go{background:var(--mint);color:#fff;border-color:var(--mint)}
+.act:active{transform:scale(.96)}
+.act:focus-visible,.choice:focus-visible,.btn:focus-visible{outline:3px solid var(--brick);outline-offset:2px}
+
+.sheet{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(18,49,58,.45);
+  padding:var(--st) var(--sr) var(--sb) var(--sl);overflow-y:auto;user-select:text;-webkit-user-select:text;touch-action:auto}
+.box{background:var(--paper);border-radius:18px;padding:24px;width:100%;max-width:520px;display:flex;flex-direction:column;gap:16px;margin:auto}
+.box h1{font-family:var(--display);font-weight:400;font-size:34px;line-height:1.15}
+.box h2{font-family:var(--display);font-weight:400;font-size:22px;line-height:1.3}
+.small{font-size:14px;color:var(--muted)}
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice,.btn{font-family:var(--body);font-size:17px;font-weight:600;text-align:left;padding:14px 16px;border-radius:12px;
+  border:2px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer;text-decoration:none}
+.choice:hover{background:var(--mint-soft)}
+.btn{text-align:center}
+.btn.primary{background:var(--mint);border-color:var(--mint);color:#fff}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+.row > *{flex:1 1 140px}
+.how{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px}
+.how li{background:var(--mint-soft);border-radius:10px;padding:8px 12px}
+.rec{list-style:none;padding:0;border-top:2px solid var(--ink)}
+.rec li{display:grid;grid-template-columns:5.4em 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.rec b{font-weight:600}
+.rec span{min-width:0}
+.rec small{display:block;color:var(--muted);font-variant-numeric:tabular-nums}
+.ask{padding-left:20px;display:flex;flex-direction:column;gap:4px}
+#fail{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;background:var(--sky)}
+</style>
+</head>
+<body>
+
+<div id="stage"></div>
+<div id="labels"></div>
+
+<div id="hud-top">
+  <a class="pill" id="home" href="index.html">← 나가기</a>
+  <span class="pill" id="dist">놀이터까지 110m</span>
+</div>
+<div id="toast" hidden></div>
+
+<div id="stick" aria-hidden="true"><div id="knob"></div></div>
+<div id="actions">
+  <button class="act go" id="ctx" type="button" hidden></button>
+  <button class="act" id="wave" type="button">손 흔들기</button>
+</div>
+
+<div class="sheet" id="intro">
+  <div class="box">
+    <h1>사회성 마을</h1>
+    <p>마을 길을 따라 놀이터까지 걸어가 보자. 가는 길에 친구들이 있어.</p>
+    <ul class="how">
+      <li>왼쪽 아래 동그라미를 밀거나 방향키로 걸어요</li>
+      <li>오른쪽 아래 버튼으로 손을 흔들 수 있어요</li>
+      <li>정답은 없어요. 하고 싶은 대로 하면 돼요</li>
+    </ul>
+    <button class="btn primary" id="start" type="button">출발</button>
+    <p class="small">보호자께. 옆에서 답을 알려 주지 말고 지켜봐 주세요. 5분쯤 걸립니다. 기록은 이 기기에만 남습니다.</p>
+  </div>
+</div>
+
+<div class="sheet" id="dialog" hidden>
+  <div class="box">
+    <h2 id="dlg-text"></h2>
+    <div class="choices" id="dlg-choices"></div>
+  </div>
+</div>
+
+<div class="sheet" id="report" hidden>
+  <div class="box">
+    <h1>놀이터 도착!</h1>
+    <p id="rep-sum"></p>
+    <ul class="rec" id="rep-list"></ul>
+    <div>
+      <h2>집에서 물어볼 것</h2>
+      <ul class="ask" id="rep-ask"></ul>
+    </div>
+    <p class="small">이 기록은 진단이 아닙니다. 게임 속 선택은 아이가 무엇을 알고 있는지를 보여 주고, 실제 친구 앞에서의 행동은 다를 수 있습니다. 선택보다 걸린 시간과 시키지 않은 행동(인사, 멈춰 서기)을 눈여겨봐 주세요.</p>
+    <div class="row">
+      <button class="btn primary" id="again" type="button">다시 하기</button>
+      <button class="btn" id="copy" type="button">기록 복사</button>
+      <a class="btn" href="index.html">홈으로</a>
+    </div>
+  </div>
+</div>
+
+<div id="fail" hidden><p>이 기기에서는 3D 화면을 열 수 없습니다. 다른 브라우저나 기기에서 다시 열어 주세요.</p></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+if (!window.THREE){ $('fail').hidden = false; return; }
+
+/* ---------- 장면 ---------- */
+var renderer;
+try { renderer = new THREE.WebGLRenderer({antialias:true}); }
+catch(e){ $('fail').hidden = false; return; }
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+$('stage').appendChild(renderer.domElement);
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0xcfe9ee);
+scene.fog = new THREE.Fog(0xcfe9ee, 40, 110);
+var camera = new THREE.PerspectiveCamera(55, 1, 0.1, 300);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8fb39a, 0.72));
+var sun = new THREE.DirectionalLight(0xffffff, 0.32); sun.position.set(8,20,10); scene.add(sun);
+
+function mat(c){ return new THREE.MeshLambertMaterial({color:c}); }
+function mesh(geo, color, x, y, z){ var m = new THREE.Mesh(geo, mat(color)); m.position.set(x||0,y||0,z||0); return m; }
+
+var ground = mesh(new THREE.PlaneGeometry(400,400), 0x9ccf9a); ground.rotation.x = -Math.PI/2; scene.add(ground);
+var road = mesh(new THREE.PlaneGeometry(16,150), 0xe9dcc0, 0, 0.01, -52); road.rotation.x = -Math.PI/2; scene.add(road);
+
+var seed = 7; function rnd(){ seed = (seed*16807) % 2147483647; return seed/2147483647; }
+for (var i=0;i<70;i++){
+  var side = rnd()<.5?-1:1, tx = side*(10+rnd()*34), tz = 12 - rnd()*150, s = .8+rnd()*.9;
+  var tree = new THREE.Group();
+  tree.add(mesh(new THREE.CylinderGeometry(.22,.3,1.4,8), 0x8a6a4a, 0, .7, 0));
+  tree.add(mesh(new THREE.ConeGeometry(1.3,2.8,9), rnd()<.5?0x4f9d6e:0x3f8a66, 0, 2.7, 0));
+  tree.position.set(tx,0,tz); tree.scale.setScalar(s); scene.add(tree);
+}
+[[-13,-20,0xf1e3c8,0xb4533c],[13,-44,0xdfe7ef,0x3f6f80],[-14,-70,0xf4d9c4,0x6b8f5a],[14,-88,0xe8e2d4,0xb4533c]].forEach(function(h){
+  var house = new THREE.Group();
+  house.add(mesh(new THREE.BoxGeometry(6,4,6), h[2], 0, 2, 0));
+  var roof = mesh(new THREE.ConeGeometry(5,2.6,4), h[3], 0, 5.3, 0); roof.rotation.y = Math.PI/4; house.add(roof);
+  house.position.set(h[0],0,h[1]); scene.add(house);
+});
+
+function person(shirt, pants){
+  var g = new THREE.Group(), skin = 0xf2c9a1;
+  g.add(mesh(new THREE.CylinderGeometry(.36,.44,.9,12), shirt, 0, 1.0, 0));
+  g.add(mesh(new THREE.SphereGeometry(.34,16,12), skin, 0, 1.78, 0));
+  var hair = mesh(new THREE.SphereGeometry(.36,16,12), 0x2b2320, 0, 1.9, -.04); hair.scale.set(1,.62,1); g.add(hair);
+  g.add(mesh(new THREE.SphereGeometry(.045,8,8), 0x1b1b1b, -.12, 1.78, .31));
+  g.add(mesh(new THREE.SphereGeometry(.045,8,8), 0x1b1b1b, .12, 1.78, .31));
+  function limb(x, y, len, color){
+    var p = new THREE.Group(); p.position.set(x,y,0);
+    p.add(mesh(new THREE.CylinderGeometry(.11,.11,len,8), color, 0, -len/2, 0)); g.add(p); return p;
+  }
+  g.userData = { armL:limb(-.5,1.38,.62,shirt), armR:limb(.5,1.38,.62,shirt),
+                 legL:limb(-.17,.56,.56,pants), legR:limb(.17,.56,.56,pants), wave:0 };
+  return g;
+}
+function pose(p, t, walking){
+  var u = p.userData, sw = walking ? Math.sin(t*11)*.7 : 0;
+  u.legL.rotation.x = sw; u.legR.rotation.x = -sw; u.armL.rotation.x = -sw;
+  if (u.wave > 0){ u.armR.rotation.x = 0; u.armR.rotation.z = 2.6 + Math.sin(t*12)*.35; }
+  else { u.armR.rotation.z = 0; u.armR.rotation.x = sw; }
+}
+
+var player = person(0x7fd3c0, 0x7fd3c0); player.position.set(0,0,4); player.rotation.y = Math.PI; scene.add(player);
+function npc(x,z,shirt,face){ var p = person(shirt, 0x25323a); p.position.set(x,0,z); p.rotation.y = face||0; scene.add(p); return p; }
+
+/* 말풍선 */
+var labels = [];
+function label(obj, h){ var d = document.createElement('div'); d.className='label'; d.hidden = true; $('labels').appendChild(d);
+  var L = {obj:obj, h:h||2.5, el:d}; labels.push(L); return L; }
+function say(L, text, secs){ L.el.textContent = text; L.el.hidden = !text; clearTimeout(L.t);
+  if (text && secs) L.t = setTimeout(function(){ L.el.hidden = true; }, secs*1000); }
+var v3 = new THREE.Vector3();
+function placeLabels(){
+  var w = window.innerWidth, h = window.innerHeight;
+  labels.forEach(function(L){
+    if (L.el.hidden) return;
+    v3.copy(L.obj.position); v3.y += L.h; v3.project(camera);
+    var on = v3.z < 1 && Math.abs(v3.x) < 1.2;
+    L.el.style.visibility = on ? 'visible' : 'hidden';
+    L.el.style.transform = 'translate(-50%,-100%) translate(' + ((v3.x*.5+.5)*w).toFixed(1) + 'px,' + ((-v3.y*.5+.5)*h).toFixed(1) + 'px)';
+  });
+}
+
+/* ---------- 정거장 ---------- */
+// 1 인사
+var n1 = npc(3,-14,0xe9a23b, -Math.PI/3), l1 = label(n1);
+// 2 돕기
+var n2 = npc(-3.5,-34,0x6c8fd6, Math.PI/2), l2 = label(n2);
+var balls = [[1.5,-31],[3.6,-35],[-.4,-37.5]].map(function(p){
+  var b = mesh(new THREE.SphereGeometry(.32,14,10), 0xe5533d, p[0], .32, p[1]); scene.add(b); return {m:b, taken:false}; });
+// 3 차례
+var slide = new THREE.Group();
+slide.add(mesh(new THREE.BoxGeometry(1.6,2.6,1.6), 0x3f6f80, 0, 1.3, 0));
+var chute = mesh(new THREE.BoxGeometry(1.3,.15,4.4), 0xf0c24b, 0, 1.25, -2.8); chute.rotation.x = -.56; slide.add(chute);
+slide.position.set(3.5,0,-61.5); scene.add(slide);
+var q1 = npc(3.5,-59.6,0xd67aa5, Math.PI), q2 = npc(3.5,-58.2,0x8bbf5a, Math.PI), lq = label(q1);
+// 4 나누기
+var bag = mesh(new THREE.BoxGeometry(.5,.7,.3), 0xf0c24b, 0, .35, -73); scene.add(bag);
+var n4 = npc(-3,-78,0xb48be0, Math.PI/2), l4 = label(n4);
+// 5 끼어들기
+var ring = [[2.5,-92],[4.4,-95.2],[.6,-95.2]].map(function(p,i){
+  var p5 = npc(p[0],p[1],[0xe9a23b,0x6c8fd6,0xd67aa5][i],0); p5.lookAt(2.5,0,-94.1); return p5; });
+var l5 = label(ring[0]);
+var playBall = mesh(new THREE.SphereGeometry(.3,14,10), 0xffffff, 2.5, 1.2, -94); scene.add(playBall);
+// 6 헤어지기
+var n6 = npc(-2.8,-106,0x1b8570, Math.PI/3), l6 = label(n6);
+[-5,5].forEach(function(x){ scene.add(mesh(new THREE.CylinderGeometry(.25,.25,5,10), 0xb4533c, x, 2.5, -110)); });
+scene.add(mesh(new THREE.BoxGeometry(11,.7,.5), 0xb4533c, 0, 5.2, -110));
+scene.add(mesh(new THREE.TorusGeometry(1.6,.14,8,24), 0x3f6f80, -4, 1.6, -120));
+scene.add(mesh(new THREE.BoxGeometry(4,.2,.6), 0xf0c24b, 4, .8, -121));
+
+/* ---------- 기록 ---------- */
+var R, state = 'intro', t0 = 0, clock = 0;
+function fresh(){
+  R = { greet:{entered:null, done:false, greeted:false, sec:null},
+        help:{entered:null, done:false, picked:0, returned:0, firstSec:null, carrying:0},
+        turn:{done:false, choice:null, sec:null, waited:null},
+        share:{done:false, given:null, sec:null},
+        join:{done:false, choice:null, sec:null},
+        bye:{entered:null, done:false, greeted:false, sec:null},
+        pauses:0, total:0 };
+}
+function secs(a){ return Math.round((clock - a)*10)/10; }
+function dist(a, b){ var dx = a.position.x-b.position.x, dz = a.position.z-b.position.z; return Math.sqrt(dx*dx+dz*dz); }
+
+var toastT;
+function toast(text, s){ var t = $('toast'); t.textContent = text; t.hidden = false; clearTimeout(toastT);
+  toastT = setTimeout(function(){ t.hidden = true; }, (s||2.2)*1000); }
+
+var dlgAt = 0;
+function ask(text, options, done){
+  state = 'dialog'; dlgAt = clock; stickVec.x = stickVec.y = 0; keys = {};
+  $('dlg-text').textContent = text;
+  var box = $('dlg-choices'); box.textContent = '';
+  options.forEach(function(o){
+    var b = document.createElement('button'); b.type='button'; b.className='choice'; b.textContent = o[1];
+    b.addEventListener('click', function(){ $('dialog').hidden = true; state = 'play'; done(o[0], secs(dlgAt)); });
+    box.appendChild(b);
+  });
+  $('dialog').hidden = false;
+}
+
+var ctxFn = null;
+function ctx(text, fn){ var b = $('ctx'); if (!text){ b.hidden = true; ctxFn = null; return; }
+  if (b.textContent !== text) b.textContent = text; b.hidden = false; ctxFn = fn; }
+$('ctx').addEventListener('click', function(){ if (ctxFn) ctxFn(); });
+
+$('wave').addEventListener('click', function(){
+  if (state !== 'play' && state !== 'wait') return;
+  player.userData.wave = 1.2;
+  var g = R.greet, b = R.bye;
+  if (!g.done && dist(player,n1) < 8){ g.done = g.greeted = true; g.sec = g.entered==null ? 0 : secs(g.entered); n1.userData.wave = 0; say(l1,'반가워!',2.5); }
+  else if (!b.done && b.entered != null && dist(player,n6) < 10){ b.done = b.greeted = true; b.sec = secs(b.entered); say(l6,'안녕, 조심히 가!',2.5); }
+});
+
+var waitAt = 0;
+function stations(){
+  var z = player.position.z, g = R.greet, h = R.help, tn = R.turn, sh = R.share, j = R.join, b = R.bye;
+  var want = null, wantFn = null;
+
+  // 1 인사: 친구가 먼저 손을 흔든다. 아이가 시키지 않아도 손을 흔드는지 본다.
+  if (!g.done){
+    if (g.entered == null && dist(player,n1) < 7){ g.entered = clock; n1.userData.wave = 99; say(l1,'안녕!'); }
+    if (z < -24){ g.done = true; n1.userData.wave = 0; say(l1,''); }
+  }
+
+  // 2 돕기: 도와 달라고 말하지 않는다. 멈춰서 줍는지 본다.
+  if (!h.done){
+    if (h.entered == null && z < -27){ h.entered = clock; say(l2,'어… 공이 다 굴러갔네'); }
+    if (h.entered != null){
+      var near = null;
+      balls.forEach(function(bl){ if (!bl.taken && dist(player,bl.m) < 1.9) near = bl; });
+      if (near){ want = '공 줍기'; wantFn = function(){ near.taken = true; near.m.visible = false; h.picked++; h.carrying++;
+        if (h.firstSec == null) h.firstSec = secs(h.entered); toast('공을 들었어요 (' + h.carrying + '개)', 1.4); }; }
+      else if (h.carrying > 0 && dist(player,n2) < 3.2){ want = '공 건네주기'; wantFn = function(){
+        h.returned += h.carrying; h.carrying = 0; say(l2, h.returned >= 3 ? '다 찾았다! 고마워!' : '고마워!', 2.5);
+        if (h.returned >= 3) h.done = true; }; }
+      if (z < -47){ h.done = true; say(l2,''); }
+    }
+  }
+
+  // 3 차례
+  if (!tn.done && z < -53){
+    tn.done = true;
+    ask('미끄럼틀이다! 친구 둘이 줄을 서 있어.', [['back','줄 맨 뒤에 선다'],['front','맨 앞으로 가서 먼저 탄다'],['pass','안 타고 지나간다']], function(c, s){
+      tn.choice = c; tn.sec = s;
+      if (c === 'back'){ player.position.set(3.5,0,-56.8); player.rotation.y = Math.PI; state = 'wait'; waitAt = clock; }
+      else if (c === 'front'){ player.position.set(2.3,0,-60.4); say(lq,'어? 우리가 먼저 왔는데…',3); ride(); }
+    });
+  }
+
+  // 4 나누기
+  if (!sh.done && z < -72.5){
+    sh.done = true; bag.visible = false; say(l4,'우와, 맛있겠다…');
+    ask('과자 봉지를 주웠어. 과자가 4개 들어 있어. 옆에서 친구가 보고 있어.', [[0,'혼자 다 먹는다'],[1,'1개 준다'],[2,'2개 준다'],[4,'전부 준다']], function(c, s){
+      sh.given = c; sh.sec = s; say(l4, c > 0 ? '고마워!' : '…', 2.5);
+    });
+  }
+
+  // 5 끼어들기
+  if (!j.done && z < -88.5){
+    j.done = true;
+    ask('친구들이 공놀이를 하고 있어.', [['ask','"같이 해도 돼?" 하고 물어본다'],['barge','말없이 들어가서 공을 잡는다'],['watch','옆에서 구경한다'],['pass','지나간다']], function(c, s){
+      j.choice = c; j.sec = s;
+      say(l5, {ask:'그래, 같이 하자!', barge:'어, 뭐야…', watch:'너도 할래?', pass:''}[c], 3);
+    });
+  }
+
+  // 6 헤어지기
+  if (!b.done){
+    if (b.entered == null && z < -99){ b.entered = clock; n6.userData.wave = 99; say(l6,'잘 가! 내일 또 보자'); }
+    if (z < -111.5){ b.done = true; }
+  }
+  if (z < -111.5 && state === 'play') finish();
+
+  if (state === 'play') ctx(want, wantFn);
+}
+
+function ride(){
+  state = 'ride';
+  ctx(null);
+  setTimeout(function(){ toast('슈웅! 미끄럼틀을 탔어요'); player.position.set(1.5,0,-67); state = 'play'; }, 1300);
+}
+function waiting(){
+  var e = clock - waitAt, tn = R.turn;
+  if (e > 5) q1.visible = false;
+  if (e > 10) q2.visible = false;
+  $('dist').textContent = '내 차례까지 ' + Math.max(0, Math.ceil(12 - e)) + '초';
+  ctx('그만 기다리고 간다', function(){ tn.waited = Math.round(e*10)/10; ctx(null); player.position.set(1.2,0,-57); state = 'play'; });
+  if (e >= 12){ tn.waited = 'full'; ride(); }
+}
+
+/* ---------- 조작 ---------- */
+var keys = {}, stickVec = {x:0,y:0};
+window.addEventListener('keydown', function(e){ keys[e.key] = true; if (e.key.indexOf('Arrow') === 0) e.preventDefault(); });
+window.addEventListener('keyup', function(e){ keys[e.key] = false; });
+var stick = $('stick'), knob = $('knob'), stickId = null;
+function stickMove(e){
+  var r = stick.getBoundingClientRect(), dx = e.clientX-(r.left+r.width/2), dy = e.clientY-(r.top+r.height/2);
+  var m = Math.sqrt(dx*dx+dy*dy), max = r.width/2 - 14; if (m > max){ dx *= max/m; dy *= max/m; }
+  knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)'; stickVec.x = dx/max; stickVec.y = dy/max;
+}
+function stickEnd(){ stickId = null; stickVec.x = stickVec.y = 0; knob.style.transform = ''; }
+stick.addEventListener('pointerdown', function(e){ stickId = e.pointerId; try{ stick.setPointerCapture(e.pointerId); }catch(_){} stickMove(e); });
+stick.addEventListener('pointermove', function(e){ if (e.pointerId === stickId) stickMove(e); });
+stick.addEventListener('pointerup', stickEnd); stick.addEventListener('pointercancel', stickEnd);
+
+/* ---------- 루프 ---------- */
+var still = 0, last = performance.now();
+function resize(){ var w = window.innerWidth, h = window.innerHeight; renderer.setSize(w,h,false); camera.aspect = w/h; camera.updateProjectionMatrix(); }
+window.addEventListener('resize', resize); resize();
+var camGoal = new THREE.Vector3(), look = new THREE.Vector3();
+
+function frame(now){
+  var dt = Math.min(.05, (now-last)/1000); last = now;
+  var walking = false;
+  if (state !== 'intro' && state !== 'done') clock += dt;
+  if (state === 'play'){
+    var mx = stickVec.x + ((keys.ArrowRight||keys.d)?1:0) - ((keys.ArrowLeft||keys.a)?1:0);
+    var mz = stickVec.y + ((keys.ArrowDown||keys.s)?1:0) - ((keys.ArrowUp||keys.w)?1:0);
+    var m = Math.sqrt(mx*mx+mz*mz);
+    if (m > .15){
+      if (m > 1){ mx /= m; mz /= m; }
+      player.position.x = Math.max(-7, Math.min(7, player.position.x + mx*5.5*dt));
+      player.position.z = Math.max(-116, Math.min(7, player.position.z + mz*5.5*dt));
+      player.rotation.y = Math.atan2(mx, mz); walking = true;
+      still = 0;
+    } else { still += dt; if (still > 4){ R.pauses++; still = -9999; } }
+    if (still < 0 && walking) still = 0;
+    $('dist').textContent = '놀이터까지 ' + Math.max(0, Math.round(player.position.z + 111.5)) + 'm';
+    stations();
+  } else if (state === 'wait') waiting();
+
+  var t = now/1000;
+  if (player.userData.wave > 0) player.userData.wave -= dt;
+  pose(player, t, walking);
+  [n1,n2,q1,q2,n4,n6].concat(ring).forEach(function(p){ pose(p, t, false); });
+  var k = (t*.6) % 3, a = ring[Math.floor(k)], b2 = ring[(Math.floor(k)+1)%3], f = k%1;
+  playBall.position.set(a.position.x+(b2.position.x-a.position.x)*f, 1.2+Math.sin(f*Math.PI)*1.1, a.position.z+(b2.position.z-a.position.z)*f);
+
+  camGoal.set(player.position.x*.55, 6.2, player.position.z + 9.5);
+  camera.position.lerp(camGoal, state === 'intro' ? 1 : .09);
+  look.set(player.position.x*.7, 1.2, player.position.z - 3); camera.lookAt(look);
+  renderer.render(scene, camera);
+  placeLabels();
+  requestAnimationFrame(frame);
+}
+
+/* ---------- 결과 ---------- */
+function finish(){
+  state = 'done'; R.total = Math.round(clock); ctx(null);
+  var g = R.greet, h = R.help, tn = R.turn, sh = R.share, j = R.join, b = R.bye;
+  var rows = [
+    ['인사', g.greeted ? '친구가 손을 흔들자 같이 손을 흔들었어요' : '손 흔드는 친구 옆을 인사 없이 지나갔어요', g.greeted ? '손 흔들기까지 ' + g.sec + '초' : ''],
+    ['돕기', h.picked === 0 ? '공을 줍지 않고 지나갔어요' : '공 3개 중 ' + h.picked + '개를 줍고 ' + h.returned + '개를 건넸어요', h.firstSec != null ? '첫 공을 줍기까지 ' + h.firstSec + '초' : ''],
+    ['차례', {back: tn.waited === 'full' ? '줄 맨 뒤에 서서 끝까지 기다렸어요' : '줄 맨 뒤에 섰다가 ' + tn.waited + '초 만에 나왔어요',
+              front:'맨 앞으로 가서 먼저 탔어요', pass:'미끄럼틀을 타지 않고 지나갔어요'}[tn.choice] || '', tn.sec != null ? '고르기까지 ' + tn.sec + '초' : ''],
+    ['나누기', sh.given == null ? '' : (sh.given === 0 ? '과자 4개를 혼자 먹었어요' : '과자 4개 중 ' + sh.given + '개를 건넸어요'), sh.sec != null ? '고르기까지 ' + sh.sec + '초' : ''],
+    ['끼어들기', {ask:'"같이 해도 돼?" 하고 물어봤어요', barge:'말없이 들어가서 공을 잡았어요', watch:'옆에서 구경했어요', pass:'지나갔어요'}[j.choice] || '', j.sec != null ? '고르기까지 ' + j.sec + '초' : ''],
+    ['헤어질 때', b.greeted ? '"잘 가" 하는 친구에게 손을 흔들었어요' : '인사 없이 놀이터로 들어갔어요', b.greeted ? '손 흔들기까지 ' + b.sec + '초' : '']
+  ];
+  var mm = Math.floor(R.total/60), ss = R.total%60;
+  var sum = '걸린 시간 ' + (mm ? mm + '분 ' : '') + ss + '초 · 길에서 오래 멈춰 선 횟수 ' + R.pauses + '번';
+  $('rep-sum').textContent = sum;
+  var ul = $('rep-list'); ul.textContent = '';
+  rows.forEach(function(r){
+    var li = document.createElement('li'), bEl = document.createElement('b'), sp = document.createElement('span');
+    bEl.textContent = r[0]; sp.textContent = r[1];
+    if (r[2]){ var sm = document.createElement('small'); sm.textContent = r[2]; sp.appendChild(sm); }
+    li.appendChild(bEl); li.appendChild(sp); ul.appendChild(li);
+  });
+  var qs = [];
+  qs.push(g.greeted ? '"아까 손 흔든 친구, 학교에서 만나면 뭐라고 할 것 같아?"' : '"처음에 손 흔들던 친구 봤어? 그 친구는 어떤 기분이었을까?"');
+  qs.push(h.picked ? '"공 주워 줄 때 친구 표정이 어땠어?"' : '"공이 굴러간 친구는 혼자 다 주웠을까?"');
+  qs.push('"줄 설 때 제일 힘든 게 뭐야?"');
+  var qa = $('rep-ask'); qa.textContent = '';
+  qs.forEach(function(q){ var li = document.createElement('li'); li.textContent = q; qa.appendChild(li); });
+
+  var text = '사회성 마을 기록 (' + new Date().toLocaleDateString('ko-KR') + ')\n' + sum + '\n' +
+    rows.map(function(r){ return r[0] + ': ' + r[1] + (r[2] ? ' (' + r[2] + ')' : ''); }).join('\n');
+  $('copy').onclick = function(){
+    var btn = $('copy');
+    function ok(){ btn.textContent = '복사했어요'; setTimeout(function(){ btn.textContent = '기록 복사'; }, 1800); }
+    function manual(){ var r = document.createRange(); r.selectNodeContents($('rep-list')); var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = '선택했어요. 길게 눌러 복사'; }
+    try { navigator.clipboard.writeText(text).then(ok, manual); } catch(e){ manual(); }
+  };
+  try {
+    var all = JSON.parse(localStorage.getItem('village-records') || '[]');
+    all.push({at:new Date().toISOString(), record:R}); localStorage.setItem('village-records', JSON.stringify(all.slice(-10)));
+  } catch(e){}
+  $('report').hidden = false;
+}
+
+function begin(){
+  fresh(); clock = 0; still = 0;
+  player.position.set(0,0,4); player.rotation.y = Math.PI;
+  balls.forEach(function(b){ b.taken = false; b.m.visible = true; });
+  q1.visible = q2.visible = true; bag.visible = true;
+  [n1,n6].forEach(function(n){ n.userData.wave = 0; });
+  labels.forEach(function(L){ say(L,''); });
+  $('intro').hidden = true; $('report').hidden = true; state = 'play';
+}
+$('start').addEventListener('click', begin);
+$('again').addEventListener('click', begin);
+fresh();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
