@@ -13,12 +13,12 @@ window.SITE = {
   address: "",          // 센터 주소
 
   // 유튜브
-  youtubeUrl: "",        // 채널 주소. 예: "https://www.youtube.com/@채널이름"
-  youtubeChannelId: "",  // "UC"로 시작하는 채널 ID. 넣으면 최신 영상 목록이 자동으로 뜹니다.
+  youtubeUrl: "https://www.youtube.com/channel/UCPRGEwx20T-9wkxA7Z0LN2w",        // 채널 주소. 예: "https://www.youtube.com/@채널이름"
+  youtubeChannelId: "UCPRGEwx20T-9wkxA7Z0LN2w",  // "UC"로 시작하는 채널 ID. 넣으면 최신 영상 목록이 자동으로 뜹니다.
   youtubeVideoIds: [],   // 고정해서 보여 줄 영상 ID. 예: ["dQw4w9WgXcQ"]
 
   // 인스타그램
-  instagramUrl: "",      // 계정 주소. 예: "https://www.instagram.com/계정이름/"
+  instagramUrl: "https://www.instagram.com/arttherapist_ji/",      // 계정 주소. 예: "https://www.instagram.com/계정이름/"
   instagramPosts: [],    // 보여 줄 게시물·릴스 주소. 예: ["https://www.instagram.com/reel/XXXX/"]
 
   // 책
