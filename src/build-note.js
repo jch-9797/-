@@ -264,7 +264,8 @@ ${S.map(s => `<section style="--c:${s.color}"><div class="head"><div class="no">
 </section>
 </body></html>`;
 
-(async () => {
+module.exports={F,card,tbl,css:html.match(/<style>([\s\S]*?)<\/style>/)[1],fontDir};
+if(require.main===module)(async () => {
   const out = process.argv[2];
   fs.writeFileSync(path.join(__dirname, 'note.html'), html);
   const b = await chromium.launch();
