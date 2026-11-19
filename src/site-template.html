@@ -1,0 +1,465 @@
+<title>임상심리사 2급 합격노트</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: OMR 답안지에서 가져온 구조 — 좁은 본문 칼럼, 번호 버블 격자, 과목별 색 띠 */
+:root{
+  --bg:#f2f4f8;--surface:#ffffff;--sunk:#e9edf4;--ink:#1b2540;--muted:#5a6583;--line:#d3d9e6;
+  --omr:#c42f4d;--on-omr:#ffffff;--omr-soft:#fbe5ea;
+  --ok:#1b7f45;--ok-soft:#dcf2e4;--bad:#c42f4d;--bad-soft:#fbe5ea;
+  --mn-bg:#fff5d2;--mn-line:#d99c00;--mn-ink:#6a4a00;--hl:#c42f4d;--hl-bg:#fde2e7;
+  --s1:#1c6fc4;--s2:#23874a;--s3:#c2520c;--s4:#6542d6;--s5:#c22a63;
+  --display:'Jua','Noto Sans KR',sans-serif;
+  --body:'Noto Sans KR',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f141d;--surface:#19212f;--sunk:#222c3d;--ink:#e7ebf5;--muted:#9aa6c0;--line:#313c53;
+  --omr:#ff8098;--on-omr:#2b0a13;--omr-soft:#3b1b25;
+  --ok:#62d391;--ok-soft:#15301f;--bad:#ff8098;--bad-soft:#3b1b25;
+  --mn-bg:#32290b;--mn-line:#b8870a;--mn-ink:#f2d98c;--hl:#ff93a7;--hl-bg:#47202b;
+  --s1:#74b4f6;--s2:#6fd192;--s3:#ffa268;--s4:#ac9aff;--s5:#ff88b4;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141d;--surface:#19212f;--sunk:#222c3d;--ink:#e7ebf5;--muted:#9aa6c0;--line:#313c53;
+  --omr:#ff8098;--on-omr:#2b0a13;--omr-soft:#3b1b25;
+  --ok:#62d391;--ok-soft:#15301f;--bad:#ff8098;--bad-soft:#3b1b25;
+  --mn-bg:#32290b;--mn-line:#b8870a;--mn-ink:#f2d98c;--hl:#ff93a7;--hl-bg:#47202b;
+  --s1:#74b4f6;--s2:#6fd192;--s3:#ffa268;--s4:#ac9aff;--s5:#ff88b4;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;word-break:keep-all;overflow-wrap:anywhere}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--omr);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.3}
+.c1{--c:var(--s1)}.c2{--c:var(--s2)}.c3{--c:var(--s3)}.c4{--c:var(--s4)}.c5{--c:var(--s5)}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .in{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:19px;padding-block:10px;color:var(--ink);text-decoration:none;white-space:nowrap}
+.brand b{color:var(--omr);font-weight:400}
+nav{display:flex;gap:2px;overflow-x:auto;min-width:0;flex:1}
+nav a{padding:12px 11px;text-decoration:none;color:var(--muted);font-weight:500;white-space:nowrap;border-bottom:3px solid transparent;font-size:14px}
+nav a[aria-current]{color:var(--ink);border-color:var(--omr);font-weight:700}
+main{max-width:1040px;margin:0 auto;padding-block:22px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+
+.btn{text-decoration:none;display:inline-block;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 15px;font-weight:700;font-size:14px}
+.btn:hover{border-color:var(--muted)}
+.btn.pri{background:var(--omr);color:var(--on-omr);border-color:var(--omr)}
+.btn.sm{padding:5px 10px;font-size:13px;font-weight:500}
+.btn[disabled]{opacity:.4;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}.small{font-size:13px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.h2{font-family:var(--display);font-size:22px;font-weight:400}
+.h3{font-size:16px;font-weight:700}
+.chip{display:inline-block;font-size:12px;font-weight:700;color:var(--c,var(--muted));border:1px solid currentColor;border-radius:99px;padding:1px 9px;white-space:nowrap}
+.seg{display:inline-flex;background:var(--sunk);border-radius:9px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;border-radius:7px;padding:6px 13px;font-size:14px;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+
+/* 홈 */
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;align-items:stretch}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(26px,5vw,38px)}
+.hero h1 span{color:var(--omr)}
+.hero p{margin:8px 0 16px;color:var(--muted);max-width:34em}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.stat b{display:block;font-family:var(--display);font-weight:400;font-size:26px;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat span{font-size:12px;color:var(--muted)}
+.ways{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.way{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px;border-top:4px solid var(--c)}
+.way:hover{border-color:var(--c)}
+.way b{font-family:var(--display);font-weight:400;font-size:18px}
+.way span{font-size:13px;color:var(--muted)}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.info dl{margin:8px 0 0;display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:14px}
+.info dt{color:var(--muted)}.info dd{margin:0;font-weight:500}
+table.hist{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.hist th,.hist td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+.hist th{color:var(--muted);font-weight:500;font-size:12px}
+.tw{overflow-x:auto}
+.pill{font-size:12px;font-weight:700;border-radius:99px;padding:2px 9px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* 시험 선택 */
+.picks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pick{text-align:left;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--c,var(--omr));border-radius:10px;padding:13px 14px;display:flex;flex-direction:column;gap:2px}
+.pick:hover{border-color:var(--c,var(--omr))}
+.pick b{font-size:16px}.pick span{font-size:13px;color:var(--muted)}
+
+/* 시험 진행 */
+.runbar{position:sticky;top:calc(env(safe-area-inset-top,0px) + 47px);z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap}
+.runbar .t{font-family:var(--display);font-size:20px;font-variant-numeric:tabular-nums;color:var(--omr);min-width:76px}
+.runbar .sp{flex:1}
+.run{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;border-top:5px solid var(--c);min-width:0}
+.qcard .qt{font-size:17px;font-weight:700;margin:10px 0 14px;display:flex;gap:8px}
+.qcard .qt i{font-family:var(--display);font-style:normal;color:var(--c);font-size:20px;line-height:1.35;flex:none}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;width:100%}
+.opt .b{flex:none;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--omr);color:var(--omr);display:grid;place-items:center;font-size:13px;font-weight:700;line-height:1}
+.opt:hover:not([disabled]){border-color:var(--omr)}
+.opt.sel{border-color:var(--omr);background:var(--omr-soft)}
+.opt.sel .b{background:var(--omr);color:var(--on-omr)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}.opt.right .b{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt[disabled]{cursor:default;color:inherit}
+.exp{margin-top:14px;background:var(--sunk);border-radius:10px;padding:11px 14px;font-size:14px}
+.exp b.v{font-weight:900}.exp .okc{color:var(--ok)}.exp .badc{color:var(--bad)}
+.qnav{margin-top:16px;justify-content:space-between}
+.omr{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 110px);max-height:calc(100vh - 130px);overflow:auto}
+.omr h3{font-size:13px;color:var(--muted);font-weight:500;margin:10px 0 6px}.omr h3:first-child{margin-top:0}
+.bub{display:grid;grid-template-columns:repeat(auto-fill,minmax(32px,1fr));gap:5px}
+.bub button{aspect-ratio:1;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);font-size:12px;font-variant-numeric:tabular-nums;padding:0;color:var(--muted)}
+.bub button.a{background:var(--omr);border-color:var(--omr);color:var(--on-omr);font-weight:700}
+.bub button.f{border-color:var(--mn-line);box-shadow:0 0 0 2px var(--mn-bg)}
+.bub button.cur{outline:2px solid var(--ink);outline-offset:1px}
+.bub button.r{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.bub button.w{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.confirm{background:var(--mn-bg);border:1px dashed var(--mn-line);color:var(--mn-ink);border-radius:10px;padding:12px 14px}
+
+/* 결과 */
+.score{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+.score .big{font-family:var(--display);font-size:60px;line-height:1;font-variant-numeric:tabular-nums}
+.score .big small{font-size:20px;color:var(--muted)}
+.stamp{display:inline-block;font-family:var(--display);font-size:22px;border:3px solid currentColor;border-radius:8px;padding:2px 14px;transform:rotate(-4deg)}
+.stamp.ok{color:var(--ok)}.stamp.bad{color:var(--bad)}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:86px 1fr 74px;gap:10px;align-items:center;font-size:14px}
+.bar .tr{height:12px;background:var(--sunk);border-radius:6px;position:relative;overflow:hidden}
+.bar .tr i{position:absolute;inset:0 auto 0 0;background:var(--c);border-radius:6px}
+.bar .tr::after{content:"";position:absolute;left:40%;top:0;bottom:0;border-left:2px dashed var(--ink);opacity:.45}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.rev{display:flex;flex-direction:column;gap:10px}
+.ritem{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--ok);border-radius:10px;padding:13px 15px}
+.ritem.x{border-left-color:var(--bad)}
+.ritem .q{font-weight:700;margin-bottom:6px}
+.ritem ol{margin:0 0 8px;padding:0;list-style:none;font-size:14px}
+.ritem li.ans{color:var(--ok);font-weight:700}.ritem li.mine{color:var(--bad);text-decoration:line-through}
+.ritem .e{font-size:14px;background:var(--sunk);border-radius:8px;padding:8px 11px}
+
+/* 암기노트 */
+.secs{display:flex;gap:6px;flex-wrap:wrap}
+.secs button{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:5px 12px;font-size:13px;color:var(--muted)}
+.secs button[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:var(--surface);font-weight:700}
+.sechead{border-left:6px solid var(--c);padding-left:12px}
+.sechead p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.cards{columns:2;column-gap:14px}
+.ncard{break-inside:avoid;background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:11px;padding:13px 14px;margin:0 0 14px}
+.ncard h3{font-family:var(--display);font-weight:400;font-size:17px;margin-bottom:6px}
+.who{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.who .face{width:48px;height:53px;flex:none}
+.who b{font-family:var(--display);font-weight:400;font-size:17px;color:var(--c);display:block;line-height:1.2}
+.who span{font-size:13px;color:var(--muted)}
+.mn{background:var(--mn-bg);border:1.5px dashed var(--mn-line);border-radius:9px;padding:7px 11px;margin:4px 0 8px;display:flex;gap:4px 12px;align-items:center;flex-wrap:wrap}
+.mn .k{font-family:var(--display);font-size:21px;color:var(--hl);line-height:1.25}
+.mn .s{font-size:13px;color:var(--mn-ink);min-width:0}.mn .s b{color:var(--hl);font-weight:900}
+.ncard ul{list-style:none;margin:0;padding:0;font-size:14px}
+.ncard li{display:grid;grid-template-columns:minmax(0,38%) minmax(0,1fr);gap:10px;padding:4px 0;border-bottom:1px dotted var(--line)}
+.ncard li:last-child{border:0}
+.ncard li>b{font-weight:700}
+.ncard em{font-style:normal;color:var(--hl);font-weight:900;background:var(--hl-bg);border-radius:3px;padding:0 2px}
+.ncard u{text-decoration:underline;text-decoration-color:var(--s1);text-underline-offset:3px}
+.ncard table{border-collapse:collapse;width:100%;font-size:13px;margin-top:4px}
+.ncard th,.ncard td{border:1px solid var(--line);padding:4px 6px;text-align:center;vertical-align:middle}
+.ncard th{background:var(--sunk);font-weight:700}
+.ncard td small{color:var(--muted)}
+.quote{border-left:3px solid var(--c);background:var(--sunk);padding:6px 10px;margin:4px 0 8px;font-size:14px}
+.tip{margin-top:8px;background:var(--sunk);border-radius:7px;padding:5px 9px;font-size:13px}
+.tip::before{content:"함께 외우기 ";font-weight:700;color:var(--c)}
+.kn{margin-top:9px;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer}
+.kn input{width:16px;height:16px;accent-color:var(--ok)}
+.hiding .ncard li>span,.hiding .ncard td,.hiding .mn .s{filter:blur(6px);cursor:pointer;user-select:none}
+.hiding .ncard .rv li>span,.hiding .ncard .rv td,.hiding .mn.rv .s,.hiding .ncard li.rv>span{filter:none}
+
+/* 플래시카드 */
+.fc{max-width:620px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:14px}
+.fcard{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:26px 22px;text-align:center;min-height:230px;display:flex;flex-direction:column;gap:10px;justify-content:center}
+.fcard .k{font-family:var(--display);font-size:clamp(28px,7vw,42px);color:var(--hl);line-height:1.25}
+.fcard .ncard{border:0;padding:0;margin:0;text-align:left;background:none}
+.prog{height:8px;background:var(--sunk);border-radius:4px;overflow:hidden}.prog i{display:block;height:100%;background:var(--ok)}
+
+.empty{text-align:center;color:var(--muted);padding:34px 10px}
+footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+@media (max-width:820px){
+  .hero,.info{grid-template-columns:1fr}.ways{grid-template-columns:1fr 1fr}.picks{grid-template-columns:1fr 1fr}
+  .run{grid-template-columns:1fr}.omr{position:static;max-height:none}.cards{columns:1}
+  .runbar{top:calc(env(safe-area-inset-top,0px) + 88px)}
+  nav{flex-basis:100%;margin-top:-6px}.brand{padding-bottom:0}nav a{padding:9px 10px}
+}
+@media (max-width:460px){.picks{grid-template-columns:1fr}.score{grid-template-columns:1fr}.bar{grid-template-columns:70px 1fr 64px}.ncard li{grid-template-columns:1fr;gap:0}.ncard li>span{color:var(--muted)}}
+@media (prefers-reduced-motion:no-preference){.opt,.btn,.way,.pick{transition:border-color .12s,background .12s}}
+</style>
+
+<header class="top"><div class="in">
+  <a class="brand" href="#home">임상심리사 2급 <b>합격노트</b></a>
+  <nav id="nav">
+    <a href="#home" data-v="home">홈</a><a href="#exam" data-v="exam">모의시험</a><a href="#study" data-v="study">암기노트</a><a href="#cards" data-v="cards">두문자 카드</a><a href="#wrong" data-v="wrong">오답노트</a>
+  </nav>
+</div></header>
+<main id="app"></main>
+
+<script>
+const D = /*DATA*/null;
+const KEY = 'cp2-state-v1';
+let st = { known: {}, wrong: {}, hist: [], cur: null, last: null, hide: false };
+try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+const $ = (s, r = document) => r.querySelector(s);
+const app = $('#app'), C = '①②③④';
+const QN = Object.fromEntries(D.q.map(q => [q.n, q]));
+const SEC = { w: D.written, p: D.practical };
+const ALL = [];
+for (const k of ['w', 'p']) SEC[k].forEach((s, si) => s.cards.forEach((c, ci) => { c.id = k + si + '-' + ci; c.sec = s; c.kind = k; ALL.push(c); }));
+const MN = ALL.filter(c => c.m);
+const ui = { tab: 'w', si: { w: 0, p: 0 }, fcKind: 'all', fcTodo: false, deck: null, fi: 0, fshow: false, askSubmit: false, onlyWrong: false, study: false, askReset: false };
+let tick = null;
+const fmt = s => { s = Math.max(0, s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' : '') + String(m).padStart(h ? 2 : 1, '0') + ':' + String(x).padStart(2, '0'); };
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const view = () => { const h = location.hash.slice(1); return ['home', 'exam', 'study', 'cards', 'wrong'].includes(h) ? h : 'home'; };
+const go = v => { if (view() === v) render(); else location.hash = v; };
+
+/* ---------- 홈 ---------- */
+function home() {
+  const known = MN.filter(c => st.known[c.id]).length, wrong = Object.keys(st.wrong).length;
+  const lastFull = st.hist.find(h => h.mode === 'full');
+  return `
+  <section class="hero">
+    <div class="panel">
+      <h1>문제 풀고, <span>두문자</span>로 외우고,<br>틀린 것만 다시.</h1>
+      <p>필기 예상문제 100문항 모의시험과 필기·실기 암기노트를 한 곳에 모았습니다. 진도와 오답은 이 기기의 브라우저에 저장됩니다.</p>
+      <div class="row">
+        <a class="btn pri" href="#exam">${st.cur ? '풀던 시험 이어서 하기' : '모의시험 시작'}</a>
+        <a class="btn" href="#cards">두문자 카드 외우기</a>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>${lastFull ? lastFull.c : '–'}</b><span>최근 전체 모의시험 점수</span></div>
+      <div class="stat"><b>${known}<small class="muted" style="font-size:14px"> / ${MN.length}</small></b><span>외운 두문자</span></div>
+      <div class="stat"><b>${wrong}</b><span>오답노트 문항</span></div>
+      <div class="stat" style="grid-column:1/-1"><div class="prog" style="margin:6px 0 8px"><i style="width:${Math.round(known / MN.length * 100)}%"></i></div><span>두문자 암기 진도 ${Math.round(known / MN.length * 100)}%</span></div>
+    </div>
+  </section>
+  <section class="ways">
+    <a class="way c1" href="#exam"><b>모의시험</b><span>전체 100문항 150분, 또는 과목별 20문항. 풀면서 바로 해설을 보는 학습 모드도 있습니다.</span></a>
+    <a class="way c2" href="#study"><b>암기노트</b><span>필기 6장, 실기 11장. 설명을 가리고 두문자만 보며 떠올려 보세요.</span></a>
+    <a class="way c3" href="#cards"><b>두문자 카드</b><span>${MN.length}개 암기법을 한 장씩. 못 외운 것만 골라 반복합니다.</span></a>
+    <a class="way c5" href="#wrong"><b>오답노트</b><span>틀린 문제가 자동으로 모입니다. 다시 맞히면 목록에서 빠집니다.</span></a>
+  </section>
+  <section class="info">
+    <div class="panel"><h2 class="h3">필기시험</h2><dl><dt>형식</dt><dd>객관식 4지 택일, 100문항</dd><dt>시간</dt><dd>2시간 30분</dd><dt>과목</dt><dd>${D.subj.join(' · ')}</dd><dt>합격</dt><dd>과목당 40점 이상, 평균 60점 이상</dd></dl></div>
+    <div class="panel"><h2 class="h3">실기시험</h2><dl><dt>형식</dt><dd>필답형(서술형)</dd><dt>시간</dt><dd>3시간</dd><dt>합격</dt><dd>100점 만점에 60점 이상</dd><dt>답안</dt><dd>번호 + 키워드 + 한 줄 설명</dd></dl></div>
+  </section>
+  ${st.hist.length ? `<section class="panel"><h2 class="h3">최근 기록</h2><div class="tw"><table class="hist"><tr><th>날짜</th><th>시험</th><th>맞힌 수</th><th>결과</th></tr>
+    ${st.hist.slice(0, 8).map(h => `<tr><td>${new Date(h.t).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })}</td><td>${h.label}</td><td>${h.c} / ${h.n}</td><td>${h.pass == null ? '<span class="muted">–</span>' : h.pass ? '<span class="pill ok">합격선</span>' : '<span class="pill bad">미달</span>'}</td></tr>`).join('')}</table></div></section>` : ''}
+  <footer>문제는 실제 기출이 아니라 출제 범위의 핵심 개념으로 만든 예상문제입니다. 시험 일정과 세부 기준은 Q-Net 공고를 확인하세요.
+    <div class="row" style="margin-top:8px">${ui.askReset ? `<span>진도·오답·기록을 모두 지울까요?</span><button class="btn sm" data-act="reset-yes">모두 지우기</button><button class="btn sm" data-act="reset-no">취소</button>` : `<button class="btn sm" data-act="reset-ask">학습 기록 초기화</button>`}</div>
+  </footer>`;
+}
+
+/* ---------- 모의시험 ---------- */
+function examSetup() {
+  const nw = Object.keys(st.wrong).length;
+  return `
+  <div><h1 class="h2">모의시험</h1><p class="muted" style="margin:4px 0 0">실제 필기시험과 같은 과목·문항 수로 구성했습니다.</p></div>
+  <div class="row"><div class="seg" role="group" aria-label="풀이 방식">
+    <button aria-pressed="${!ui.study}" data-act="mode" data-v="0">시험 모드</button><button aria-pressed="${ui.study}" data-act="mode" data-v="1">학습 모드</button></div>
+    <span class="small muted">${ui.study ? '답을 고르면 바로 정답과 해설이 나옵니다. 시간 제한이 없습니다.' : '시간을 재고, 제출한 뒤에 채점합니다.'}</span></div>
+  <div class="picks">
+    <button class="pick" data-act="start" data-m="full"><b>전체 모의시험</b><span>100문항 · ${ui.study ? '시간 제한 없음' : '150분'}</span></button>
+    ${D.subj.map((s, i) => `<button class="pick c${i + 1}" data-act="start" data-m="s${i}"><b>${i + 1}과목 ${s}</b><span>20문항 · ${ui.study ? '시간 제한 없음' : '30분'}</span></button>`).join('')}
+    <button class="pick" data-act="start" data-m="wrong" ${nw ? '' : 'disabled'}><b>오답만 다시 풀기</b><span>${nw ? nw + '문항 · 시간 제한 없음' : '아직 오답이 없습니다'}</span></button>
+    <button class="pick" data-act="start" data-m="rand"><b>랜덤 20문항</b><span>전 과목에서 무작위 · ${ui.study ? '시간 제한 없음' : '30분'}</span></button>
+  </div>
+  ${st.last ? `<div class="row"><button class="btn" data-act="show-last">지난 결과 다시 보기</button></div>` : ''}`;
+}
+function startExam(m) {
+  let ids, label, dur;
+  if (m === 'full') { ids = D.q.map(q => q.n); label = '전체 100문항'; dur = 9000; }
+  else if (m === 'wrong') { ids = Object.keys(st.wrong).map(Number).sort((a, b) => a - b); label = '오답 다시 풀기'; dur = 0; }
+  else if (m === 'rand') { ids = shuffle(D.q.map(q => q.n)).slice(0, 20).sort((a, b) => a - b); label = '랜덤 20문항'; dur = 1800; }
+  else { const s = +m[1]; ids = D.q.filter(q => q.s === s).map(q => q.n); label = (s + 1) + '과목 ' + D.subj[s]; dur = 1800; }
+  if (!ids.length) return;
+  const study = ui.study || m === 'wrong';
+  st.cur = { mode: m, label, ids, ans: {}, flag: {}, i: 0, start: Date.now(), dur: study ? 0 : dur, study };
+  ui.askSubmit = false; save(); render(); scrollTo(0, 0);
+}
+function remain() { const c = st.cur; return c.dur ? c.dur - Math.floor((Date.now() - c.start) / 1000) : null; }
+function examRun() {
+  const c = st.cur, n = c.ids[c.i], q = QN[n], a = c.ans[n], done = Object.keys(c.ans).length;
+  const locked = c.study && a != null;
+  const groups = [...new Set(c.ids.map(id => QN[id].s))];
+  return `
+  <div class="runbar"><b>${c.label}</b>${c.study ? '<span class="chip">학습 모드</span>' : `<span class="t" id="timer">${fmt(remain())}</span>`}
+    <span class="small muted">${done} / ${c.ids.length} 답함</span><span class="sp"></span>
+    <button class="btn sm" data-act="quit-ask">그만두기</button><button class="btn pri sm" data-act="submit-ask">${c.study ? '마치기' : '제출'}</button></div>
+  ${ui.askSubmit === 'submit' ? `<div class="confirm row"><span>${c.ids.length - done ? `아직 안 푼 문제가 ${c.ids.length - done}개 있습니다. ` : ''}${c.study ? '여기서 마치고 결과를 볼까요?' : '제출하고 채점할까요?'}</span><button class="btn pri sm" data-act="submit">${c.study ? '마치기' : '제출하기'}</button><button class="btn sm" data-act="cancel">계속 풀기</button></div>` : ''}
+  ${ui.askSubmit === 'quit' ? `<div class="confirm row"><span>지금 그만두면 이번 풀이는 기록되지 않습니다.</span><button class="btn sm" data-act="quit">그만두기</button><button class="btn sm" data-act="cancel">계속 풀기</button></div>` : ''}
+  <div class="run">
+    <article class="qcard c${q.s + 1}">
+      <div class="row"><span class="chip">${D.subj[q.s]}</span><span class="small muted">${c.i + 1} / ${c.ids.length}</span></div>
+      <div class="qt"><i>${n}.</i><span>${q.q}</span></div>
+      <div class="opts">${q.o.map((t, i) => `<button class="opt ${locked ? (i === q.a ? 'right' : i === a ? 'wrong' : '') : (i === a ? 'sel' : '')}" data-act="ans" data-i="${i}" ${locked ? 'disabled' : ''}><span class="b">${i + 1}</span><span>${t}</span></button>`).join('')}</div>
+      ${locked ? `<div class="exp"><b class="v ${a === q.a ? 'okc' : 'badc'}">${a === q.a ? '정답입니다.' : '오답입니다. 정답은 ' + C[q.a] + '번.'}</b> ${q.e}</div>` : ''}
+      <div class="row qnav"><button class="btn" data-act="prev" ${c.i ? '' : 'disabled'}>이전</button>
+        <button class="btn sm" data-act="flag">${c.flag[n] ? '표시 해제' : '나중에 다시 보기'}</button>
+        <button class="btn ${a != null ? 'pri' : ''}" data-act="next" ${c.i < c.ids.length - 1 ? '' : 'disabled'}>다음</button></div>
+    </article>
+    <aside class="omr" aria-label="답안지">${groups.map(s => `<h3>${D.subj[s]}</h3><div class="bub">${c.ids.map((id, idx) => QN[id].s !== s ? '' : `<button class="${c.study && c.ans[id] != null ? (c.ans[id] === QN[id].a ? 'r' : 'w') : c.ans[id] != null ? 'a' : ''} ${c.flag[id] ? 'f' : ''} ${idx === c.i ? 'cur' : ''}" data-act="jump" data-i="${idx}" aria-label="${id}번">${id}</button>`).join('')}</div>`).join('')}
+      <p class="small muted" style="margin:10px 0 0">숫자 키 1~4로 답을 고르고 ←→로 이동할 수 있습니다.</p></aside>
+  </div>`;
+}
+function submitExam() {
+  const c = st.cur; if (!c) return;
+  const per = [0, 0, 0, 0, 0], tot = [0, 0, 0, 0, 0]; let ok = 0;
+  for (const id of c.ids) { const q = QN[id]; tot[q.s]++; if (c.ans[id] === q.a) { ok++; per[q.s]++; delete st.wrong[id]; } else st.wrong[id] = (st.wrong[id] || 0) + 1; }
+  let pass = null;
+  if (c.mode === 'full') pass = ok >= 60 && per.every(x => x >= 8);
+  else if (c.mode[0] === 's' || c.mode === 'rand') pass = ok / c.ids.length >= 0.6;
+  const r = { t: Date.now(), mode: c.mode, label: c.label, ids: c.ids, ans: c.ans, n: c.ids.length, c: ok, per, tot, pass, used: Math.floor((Date.now() - c.start) / 1000) };
+  st.last = r; st.hist.unshift({ t: r.t, mode: r.mode, label: r.label, n: r.n, c: r.c, pass }); st.hist = st.hist.slice(0, 20);
+  st.cur = null; ui.askSubmit = false; ui.result = true; ui.onlyWrong = ok < c.ids.length; save(); render(); scrollTo(0, 0);
+}
+function examResult() {
+  const r = st.last, pct = Math.round(r.c / r.n * 100), full = r.mode === 'full';
+  const fail = full ? r.per.map((x, i) => x < 8 ? D.subj[i] : null).filter(Boolean) : [];
+  const list = r.ids.filter(id => !ui.onlyWrong || r.ans[id] !== QN[id].a);
+  return `
+  <div class="row" style="justify-content:space-between"><h1 class="h2">${r.label} 결과</h1><button class="btn" data-act="back-setup">다른 시험 보기</button></div>
+  <section class="panel score">
+    <div><div class="big">${full ? r.c : pct}<small>점</small></div><div class="muted small">${r.c} / ${r.n} 문항 · ${fmt(r.used)} 소요</div></div>
+    <div>${r.pass == null ? '' : `<span class="stamp ${r.pass ? 'ok' : 'bad'}">${r.pass ? '합격선 통과' : '합격선 미달'}</span>`}
+      <p style="margin:10px 0 0">${full ? (r.pass ? '평균 60점 이상이고 과락 과목이 없습니다.' : fail.length ? `과락(40점 미만) 과목: <b>${fail.join(', ')}</b>. 이 과목 암기노트부터 다시 보세요.` : '과락은 없지만 평균 60점에 못 미칩니다.') : r.pass == null ? '틀린 문제는 오답노트에 남아 있습니다.' : r.pass ? '이 범위는 60점 기준을 넘었습니다.' : '60점 기준에 못 미칩니다. 해설을 읽고 다시 풀어 보세요.'}</p></div>
+  </section>
+  ${r.tot.filter(Boolean).length > 1 ? `<section class="panel"><h2 class="h3" style="margin-bottom:10px">과목별 점수 <span class="small muted" style="font-weight:400">점선은 과락 기준 40점</span></h2><div class="bars">
+    ${r.tot.map((t, i) => t ? `<div class="bar c${i + 1}"><span>${D.subj[i]}</span><div class="tr"><i style="width:${r.per[i] / t * 100}%"></i></div><span class="v">${r.per[i]} / ${t}</span></div>` : '').join('')}</div></section>` : ''}
+  <div class="row" style="justify-content:space-between"><h2 class="h3">문항별 해설</h2><div class="seg"><button aria-pressed="${ui.onlyWrong}" data-act="ow" data-v="1">틀린 문제만</button><button aria-pressed="${!ui.onlyWrong}" data-act="ow" data-v="0">전체</button></div></div>
+  <div class="rev">${list.length ? list.map(id => reviewItem(QN[id], r.ans[id])).join('') : '<div class="empty panel">틀린 문제가 없습니다.</div>'}</div>`;
+}
+function reviewItem(q, a, extra = '') {
+  const ok = a === q.a;
+  return `<div class="ritem ${ok || a === undefined && extra ? '' : 'x'}"><div class="row" style="margin-bottom:4px"><span class="chip c${q.s + 1}">${D.subj[q.s]}</span>${extra}</div>
+    <div class="q">${q.n}. ${q.q}</div>
+    <ol>${q.o.map((t, i) => `<li class="${i === q.a ? 'ans' : i === a ? 'mine' : ''}">${C[i]} ${t}${i === q.a ? ' (정답)' : i === a ? ' (내 답)' : ''}</li>`).join('')}</ol>
+    ${a == null && !extra ? '<div class="small muted" style="margin-bottom:6px">답을 고르지 않았습니다.</div>' : ''}<div class="e">${q.e}</div></div>`;
+}
+
+/* ---------- 암기노트 ---------- */
+const hl = s => s.replace(/\[(.+?)\]/g, '<em>$1</em>');
+function noteCard(c, withCheck = true) {
+  let h = `<article class="ncard ${c.sec.cls}">`;
+  if (c.face) h += `<div class="who">${c.face}<div><b>${c.who}</b>${c.img ? `<span>${c.img}</span>` : ''}</div></div>`;
+  h += `<h3>${c.t}</h3>`;
+  if (c.quote) h += `<div class="quote">${c.quote}</div>`;
+  if (c.m) h += `<div class="mn" data-rv><span class="k">${c.m}</span><span class="s">${c.s}</span></div>`;
+  if (c.i) h += `<ul>${c.i.map(([a, b]) => `<li data-rv><b>${hl(a)}</b><span>${hl(b)}</span></li>`).join('')}</ul>`;
+  if (c.table) h += `<div class="tw" data-rv><table>${c.table.map((r, i) => `<tr>${r.map(x => i ? `<td>${x}</td>` : `<th>${x}</th>`).join('')}</tr>`).join('')}</table></div>`;
+  if (c.tip) h += `<div class="tip">${c.tip}</div>`;
+  if (c.m && withCheck) h += `<label class="kn"><input type="checkbox" id="kn-${c.id}" data-known="${c.id}" ${st.known[c.id] ? 'checked' : ''}> 외웠어요</label>`;
+  return h + `</article>`;
+}
+function study() {
+  const secs = SEC[ui.tab], s = secs[ui.si[ui.tab]];
+  return `
+  <div><h1 class="h2">암기노트</h1><p class="muted" style="margin:4px 0 0">빨간 글자가 두문자, 노란 상자가 연상 문장입니다.</p></div>
+  <div class="row"><div class="seg"><button aria-pressed="${ui.tab === 'w'}" data-act="tab" data-v="w">필기 (6장)</button><button aria-pressed="${ui.tab === 'p'}" data-act="tab" data-v="p">실기 (11장)</button></div>
+    <button class="btn sm" data-act="hide" aria-pressed="${!!st.hide}">${st.hide ? '설명 모두 보기' : '설명 가리고 떠올리기'}</button>
+    ${st.hide ? '<span class="small muted">흐린 부분을 누르면 보입니다.</span>' : ''}</div>
+  <div class="secs">${secs.map((x, i) => `<button class="${x.cls}" aria-pressed="${i === ui.si[ui.tab]}" data-act="sec" data-i="${i}">${x.no}. ${x.short}</button>`).join('')}</div>
+  <div class="sechead ${s.cls}"><h2 class="h3">${s.title}</h2><p>${s.sub}</p></div>
+  <div class="cards ${st.hide ? 'hiding' : ''}">${s.cards.map(c => noteCard(c)).join('')}</div>
+  <div class="row" style="justify-content:space-between"><button class="btn" data-act="sec" data-i="${ui.si[ui.tab] - 1}" ${ui.si[ui.tab] ? '' : 'disabled'}>이전 장</button><button class="btn" data-act="sec" data-i="${ui.si[ui.tab] + 1}" ${ui.si[ui.tab] < secs.length - 1 ? '' : 'disabled'}>다음 장</button></div>`;
+}
+
+/* ---------- 두문자 카드 ---------- */
+function buildDeck() { ui.deck = shuffle(MN.filter(c => (ui.fcKind === 'all' || c.kind === ui.fcKind) && (!ui.fcTodo || !st.known[c.id])).map(c => c.id)); ui.fi = 0; ui.fshow = false; }
+function cards() {
+  if (!ui.deck) buildDeck();
+  const pool = MN.filter(c => ui.fcKind === 'all' || c.kind === ui.fcKind), kn = pool.filter(c => st.known[c.id]).length;
+  const id = ui.deck[ui.fi], c = ALL.find(x => x.id === id);
+  return `<div class="fc">
+  <div><h1 class="h2">두문자 카드</h1><p class="muted" style="margin:4px 0 0">두문자를 보고 내용을 떠올린 뒤 카드를 뒤집어 확인하세요.</p></div>
+  <div class="row"><div class="seg"><button aria-pressed="${ui.fcKind === 'all'}" data-act="fck" data-v="all">전체</button><button aria-pressed="${ui.fcKind === 'w'}" data-act="fck" data-v="w">필기</button><button aria-pressed="${ui.fcKind === 'p'}" data-act="fck" data-v="p">실기</button></div>
+    <label class="kn" style="margin:0"><input type="checkbox" id="fc-todo" data-act-change="fctodo" ${ui.fcTodo ? 'checked' : ''}> 못 외운 것만</label></div>
+  <div><div class="prog"><i style="width:${pool.length ? kn / pool.length * 100 : 0}%"></i></div><div class="small muted" style="margin-top:4px">${kn} / ${pool.length}개 외움${c ? ` · 이번 묶음 ${ui.fi + 1} / ${ui.deck.length}` : ''}</div></div>
+  ${c ? `<div class="fcard ${c.sec.cls}">
+      ${ui.fshow ? noteCard(c, false) : `<span class="chip" style="align-self:center">${c.kind === 'w' ? '필기' : '실기'} ${c.sec.no}장 · ${c.sec.short}</span><div class="k">${c.m}</div><div class="h3">${c.t}</div>`}
+    </div>
+    ${ui.fshow ? `<div class="row" style="justify-content:center"><button class="btn" data-act="fc-no">아직 헷갈려요</button><button class="btn pri" data-act="fc-yes">외웠어요</button></div>`
+      : `<div class="row" style="justify-content:center"><button class="btn pri" data-act="fc-flip">뒤집어서 확인</button><button class="btn" data-act="fc-skip">건너뛰기</button></div>`}`
+    : `<div class="panel empty">${ui.deck.length ? '이번 묶음을 끝까지 봤습니다.' : '이 조건에 해당하는 카드가 없습니다. 모두 외웠습니다.'}<div class="row" style="justify-content:center;margin-top:12px"><button class="btn pri" data-act="fc-again">다시 섞어서 보기</button></div></div>`}
+  </div>`;
+}
+
+/* ---------- 오답노트 ---------- */
+function wrong() {
+  const ids = Object.keys(st.wrong).map(Number).sort((a, b) => a - b);
+  const by = [0, 1, 2, 3, 4].map(s => ids.filter(id => QN[id].s === s).length);
+  return `
+  <div class="row" style="justify-content:space-between"><div><h1 class="h2">오답노트</h1><p class="muted" style="margin:4px 0 0">틀리거나 못 푼 문제가 쌓입니다. 다시 풀어 맞히면 빠집니다.</p></div>
+    ${ids.length ? `<button class="btn pri" data-act="start" data-m="wrong">오답 ${ids.length}문항 다시 풀기</button>` : ''}</div>
+  ${ids.length ? `<div class="row">${by.map((n, i) => n ? `<span class="chip c${i + 1}">${D.subj[i]} ${n}</span>` : '').join('')}</div>
+  <div class="rev">${ids.map(id => reviewItem(QN[id], undefined, `<span class="small muted">${st.wrong[id]}번 틀림</span><button class="btn sm" data-act="unwrong" data-id="${id}" style="margin-left:auto">목록에서 빼기</button>`)).join('')}</div>`
+    : `<div class="panel empty">아직 오답이 없습니다. 모의시험을 풀면 틀린 문제가 여기에 모입니다.<div class="row" style="justify-content:center;margin-top:12px"><a class="btn pri" href="#exam">모의시험 보러 가기</a></div></div>`}`;
+}
+
+/* ---------- 렌더 & 이벤트 ---------- */
+function render() {
+  const v = view();
+  document.querySelectorAll('#nav a').forEach(a => a.dataset.v === v ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+  clearInterval(tick);
+  let h;
+  if (v === 'exam') h = st.cur ? examRun() : (ui.result && st.last ? examResult() : examSetup());
+  else h = { home, study, cards, wrong }[v]();
+  app.innerHTML = h;
+  if (v === 'exam' && st.cur && st.cur.dur) tick = setInterval(() => { const r = remain(), el = $('#timer'); if (r <= 0) return submitExam(); if (el) el.textContent = fmt(r); }, 1000);
+}
+function move(d) { const c = st.cur; const n = c.i + d; if (n >= 0 && n < c.ids.length) { c.i = n; save(); render(); } }
+function answer(i) { const c = st.cur, n = c.ids[c.i]; if (c.study && c.ans[n] != null) return; c.ans[n] = (!c.study && c.ans[n] === i) ? undefined : i; if (c.ans[n] === undefined) delete c.ans[n]; save(); render(); }
+app.addEventListener('click', e => {
+  const rv = e.target.closest('.hiding [data-rv]'); if (rv) rv.classList.add('rv');
+  const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+  const a = b.dataset.act, c = st.cur;
+  if (a === 'mode') ui.study = b.dataset.v === '1';
+  else if (a === 'start') { if (view() !== 'exam') { location.hash = 'exam'; } ui.result = false; return startExam(b.dataset.m); }
+  else if (a === 'show-last') ui.result = true;
+  else if (a === 'back-setup') ui.result = false;
+  else if (a === 'ans') return answer(+b.dataset.i);
+  else if (a === 'prev') return move(-1);
+  else if (a === 'next') return move(1);
+  else if (a === 'jump') { c.i = +b.dataset.i; save(); }
+  else if (a === 'flag') { const n = c.ids[c.i]; c.flag[n] ? delete c.flag[n] : c.flag[n] = 1; save(); }
+  else if (a === 'submit-ask') ui.askSubmit = 'submit';
+  else if (a === 'quit-ask') ui.askSubmit = 'quit';
+  else if (a === 'cancel') ui.askSubmit = false;
+  else if (a === 'submit') return submitExam();
+  else if (a === 'quit') { st.cur = null; ui.askSubmit = false; ui.result = false; save(); }
+  else if (a === 'ow') ui.onlyWrong = b.dataset.v === '1';
+  else if (a === 'tab') ui.tab = b.dataset.v;
+  else if (a === 'sec') { ui.si[ui.tab] = +b.dataset.i; render(); return scrollTo(0, 0); }
+  else if (a === 'hide') { st.hide = !st.hide; save(); }
+  else if (a === 'fck') { ui.fcKind = b.dataset.v; buildDeck(); }
+  else if (a === 'fc-flip') ui.fshow = true;
+  else if (a === 'fc-skip') { ui.fi++; ui.fshow = false; }
+  else if (a === 'fc-yes' || a === 'fc-no') { const id = ui.deck[ui.fi]; a === 'fc-yes' ? st.known[id] = 1 : delete st.known[id]; ui.fi++; ui.fshow = false; save(); }
+  else if (a === 'fc-again') buildDeck();
+  else if (a === 'unwrong') { delete st.wrong[b.dataset.id]; save(); }
+  else if (a === 'reset-ask') ui.askReset = true;
+  else if (a === 'reset-no') ui.askReset = false;
+  else if (a === 'reset-yes') { st = { known: {}, wrong: {}, hist: [], cur: null, last: null, hide: false }; ui.askReset = false; ui.deck = null; save(); }
+  else return;
+  render();
+});
+app.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.known) { t.checked ? st.known[t.dataset.known] = 1 : delete st.known[t.dataset.known]; save(); }
+  else if (t.dataset.actChange === 'fctodo') { ui.fcTodo = t.checked; buildDeck(); render(); }
+});
+addEventListener('keydown', e => {
+  if (view() !== 'exam' || !st.cur || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key >= '1' && e.key <= '4') answer(+e.key - 1);
+  else if (e.key === 'ArrowRight') move(1);
+  else if (e.key === 'ArrowLeft') move(-1);
+});
+addEventListener('hashchange', () => { ui.askSubmit = false; ui.askReset = false; render(); scrollTo(0, 0); });
+render();
+</script>
