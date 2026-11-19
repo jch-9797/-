@@ -1,6 +1,6 @@
 const fs = require('fs'), path = require('path');
 const { chromium } = require('playwright');
-const { F, card, css, fontDir } = require('./build.js');
+const { F, card, css, fontDir, reflow } = require('./build.js');
 const { SUBJ, Q } = require('./exam.js');
 const head = extra => `<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <link rel="stylesheet" href="file://${fontDir}/pretendard/dist/web/static/pretendard.css">
@@ -115,6 +115,7 @@ const note = head('') + `
  <div class="box"><h3>📝 필기시험 한눈에 보기</h3><ul class="d"><li>객관식 4지 택일 <b>100문항</b> / <b>2시간 30분</b></li><li>5과목 × 20문항</li><li>과목당 <b class="big">40</b>점 이상 + 평균 <b class="big">60</b>점 이상</li></ul><div class="note">※ 세부 사항은 Q-Net 공고를 확인하세요.</div></div>
  <div class="box"><h3>🧭 전략: 과락만 피하고 평균 60</h3><ul class="d"><li><b>점수 밭</b>: 심리상담 · 임상심리학 · 이상심리학 (실기와 겹침)</li><li><b>과락 주의</b>: 심리학개론(범위 넓음) · 심리검사(숫자 많음)</li><li>객관식은 “정확히 쓰기”가 아니라 <b>“보고 알아보기”</b> → 키워드-학자 짝짓기가 핵심</li></ul></div>
 </div>
+<div class="formula"><h3>🖼️ 그림으로 외우는 법</h3>카드마다 <b>장면 그림</b>(연상 문장을 그림으로)과 <b>회색 칸</b>(두문자의 글자 하나 = 내용 하나 + 연상 단어 + 그림)이 있습니다. <b>그림 → 두문자 → 내용 → 연상 단어 → 그림</b> 순서로 이어서 떠올리세요. 복습할 때는 회색 칸의 글씨를 손으로 가리고 그림만 보며 내용을 말해 보세요.</div>
 <div class="formula"><h3>🔗 실기 암기노트와 함께 보세요</h3>필기 5과목 중 <b>심리검사 · 임상심리학 · 심리상담 · 이상심리</b>는 실기와 내용이 겹칩니다. 이 노트에는 <b>필기에만 나오는 내용</b>을 중심으로 담았고, 겹치는 부분은 “실기 ○장”으로 표시했습니다. 필기 때 실기 노트까지 외워두면 실기 준비가 절반은 끝납니다.</div>
 <div class="toc" style="grid-template-columns:repeat(3,1fr)">${S.map(s => `<div style="background:${s.color}"><b>${s.no}</b>${s.title.replace(/ \(.*/, '')}</div>`).join('')}</div>
 <div class="note">※ 교재마다 용어 번역이 조금씩 다릅니다. 본인 교재의 표현과 함께 묶어 외우세요.</div></section>
@@ -125,7 +126,7 @@ ${S.map(s => `<section style="--c:${s.color}"><div class="head"><div class="no">
   const b = await chromium.launch();
   for (const [name, h] of [['exam', exam], ['note2', note]]) {
     const f = path.join(__dirname, name + '.html'); fs.writeFileSync(f, h.replace(/(\d\.\d)00(?=pt|px)/g, '$1'));
-    const p = await b.newPage(); await p.goto('file://' + f); await p.evaluate(() => document.fonts.ready);
+    const p = await b.newPage(); await p.goto('file://' + f); await p.evaluate(() => document.fonts.ready); if (name === 'note2') { await p.setViewportSize({ width: 718, height: 1035 }); await p.emulateMedia({ media: 'print' }); await p.evaluate(reflow); }
     await p.pdf({ path: path.join(__dirname, name + '.pdf'), format: 'A4', printBackground: true, preferCSSPageSize: true });
   }
   await b.close();

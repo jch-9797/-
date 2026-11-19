@@ -158,18 +158,25 @@ sec('d1', '#7048e8', '11', '자문 · 교육 · 심리재활', '분량은 적지
 // ---------- HTML ----------
 const kw = s => s.replace(/\[(.+?)\]/g, '<em>$1</em>');
 const tbl = t => `<table>${t.map((r, i) => `<tr>${r.map(c => i === 0 ? `<th>${c}</th>` : `<td>${c}</td>`).join('')}</tr>`).join('')}</table>`;
+const PIC = require('./pictures.js');
+const escH = x => String(x).replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]));
+function picStrip(m) {
+  const p = PIC[m]; if (!p) return '';
+  return `<div class="pic"><div class="tiles">${p[1].map(x => { const [sy, ct, e, cu] = x.split('|');
+    return `<div class="tile"><span class="e">${e}</span><span class="sy">${escH(sy)}</span><span class="ct">${escH(ct)}</span>${cu ? `<span class="cu">${escH(cu)}</span>` : ''}</div>`; }).join('')}</div></div>`;
+}
 function card(c) {
   let h = `<div class="card">`;
   if (c.face) h += `<div class="who">${c.face}<div><div class="name">${c.who}</div>${c.img ? `<div class="img">${c.img}</div>` : ''}</div></div>`;
   h += `<h3>${c.t}</h3>`;
   if (c.quote) h += `<div class="quote">“${c.quote}”</div>`;
-  if (c.m) h += `<div class="mn"><span class="key">${c.m}</span><span class="story">${c.s}</span></div>`;
+  if (c.m) h += `<div class="mn"><span class="key">${c.m}</span><span class="story">${c.s}</span>${PIC[c.m] ? `<span class="scn">${PIC[c.m][0]}</span>` : ''}</div>` + picStrip(c.m);
   if (c.i) h += `<ul>${c.i.map(([a, b]) => `<li><b>${kw(a)}</b><span>${b}</span></li>`).join('')}</ul>`;
   if (c.table) h += tbl(c.table);
   if (c.tip) h += `<div class="tip">💡 ${c.tip}</div>`;
   return h + `</div>`;
 }
-const quiz = S.flatMap(s => s.cards.filter(c => c.m && c.m.length < 22).map(c => [c.m, c.t.replace(/ — .*/, '').replace(/\(.*?\)/g, '').trim(), s.no]));
+const quiz = S.flatMap(s => s.cards.filter(c => c.m && c.m.length < 22).map(c => [c.m, c.t.replace(/ — .*/, '').replace(/\(.*?\)/g, '').trim(), s.no, PIC[c.m] ? PIC[c.m][0] : '']));
 
 const fontDir = path.join(__dirname, 'node_modules');
 const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8">
@@ -178,7 +185,7 @@ const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <style>
 @page{size:A4;margin:11mm 10mm 12mm}
 *{box-sizing:border-box}
-body{margin:0;zoom:1.06;font-family:Pretendard,'Noto Color Emoji',sans-serif;font-size:8.600pt;line-height:1.42;color:#212529;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;zoom:1.0;font-family:Pretendard,'Noto Color Emoji',sans-serif;font-size:8.600pt;line-height:1.42;color:#212529;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 h1,h2,h3,.key,.name,.big{font-family:Jua,Pretendard,sans-serif;font-weight:400}
 section{break-before:page;--c:#1c7ed6}
 .head{background:var(--c);color:#fff;border-radius:10px;padding:8px 14px;display:flex;align-items:center;gap:12px;margin-bottom:9px}
@@ -190,6 +197,14 @@ section{break-before:page;--c:#1c7ed6}
 .who{display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .face{width:46px;height:50px;flex:none}
 .name{font-size:12pt;color:var(--c);line-height:1.1}.img{font-size:8.500pt;color:#495057}
+.pic{margin:-1px 0 4px}
+.scn{margin-left:auto;font-family:'Noto Color Emoji',sans-serif;font-size:13pt;letter-spacing:1px;white-space:nowrap;flex:none}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:2px}
+.tile{background:#f1f3f5;border-radius:5px;padding:1px 1px 2px;text-align:center;display:flex;flex-direction:column;align-items:center;line-height:1.12}
+.tile .e{font-size:11.5pt;font-family:'Noto Color Emoji',sans-serif;line-height:1.1}
+.tile .sy{font:400 8.5pt Jua;color:#e03131}
+.tile .ct{font-size:6.3pt;font-weight:700}
+.tile .cu{font-size:5.9pt;color:#666}
 .mn{background:#fff9db;border:1.300px dashed #f59f00;border-radius:8px;padding:4px 8px;margin:3px 0 5px;display:flex;align-items:center;gap:9px}
 .key{font-size:13.500pt;color:#e03131;white-space:nowrap;letter-spacing:.5px;flex:none;max-width:48%;white-space:normal;line-height:1.15}
 .story{font-size:8.400pt;color:#5c3c00}.story b{color:#e03131;font-weight:800}
@@ -222,6 +237,8 @@ td small{color:#666}
 .toc b{font:400 11pt Jua;display:block}
 .note{font-size:7.800pt;color:#868e96;margin-top:8px}
 .q{column-count:2;column-gap:10px}
+.q td{height:auto!important;padding-top:1.5px!important;padding-bottom:1.5px!important}
+.q td.pe{font-family:'Noto Color Emoji',sans-serif;font-size:7.5pt;line-height:1.2;letter-spacing:1px;white-space:nowrap;width:1%}
 .q table{break-inside:auto}.q td{text-align:left;height:19px}.q td.k{font:400 10.500pt Jua;color:#e03131;white-space:nowrap;width:34%}.q td.b{width:8%;text-align:center;color:#868e96}
 </style></head><body>
 
@@ -239,7 +256,7 @@ td small{color:#666}
    <li>기출 반복 비율이 높음 → <b>“키워드를 정확히 쓰는가”</b>가 당락</li></ul>
    <div class="note">※ 문항 수·세부 일정은 회차마다 다르니 Q-Net 공고를 꼭 확인하세요.</div></div>
   <div class="box"><h3>📖 이 노트 읽는 법</h3>
-   <ul class="d"><li><span class="key" style="font-size:11pt">빨간 글씨</span> = 두문자 (이것만 떠올리면 됨)</li><li>노란 상자 = 두문자를 문장으로 만든 <b>연상 스토리</b></li>
+   <ul class="d"><li><span class="key" style="font-size:11pt">빨간 글씨</span> = 두문자 (이것만 떠올리면 됨)</li><li>노란 상자 = 두문자를 문장으로 만든 <b>연상 스토리</b></li><li>그림 줄 = <b>그림 → 두문자 → 내용 → 연상 단어 → 그림</b> 사슬. 회색 칸 하나가 두문자의 글자 하나</li>
    <li><em>빨</em>간 형광 글자 = 그 두문자가 나온 자리</li><li>💡 = 함께 나오는 보너스 키워드</li><li>마지막 장 = <b>가리고 써보는 셀프 테스트</b></li></ul></div>
  </div>
  <div class="formula"><h3>✍️ 서술형 답안 공식 — “번호 + 키워드 + 한 줄 설명”</h3>
@@ -258,13 +275,41 @@ td small{color:#666}
 
 ${S.map(s => `<section style="--c:${s.color}"><div class="head"><div class="no">${s.no}</div><div><h2>${s.title}</h2><p>${s.sub}</p></div></div><div class="cols">${s.cards.map(card).join('')}</div></section>`).join('\n')}
 
-<section style="--c:#495057"><div class="head"><div class="no">★</div><div><h2>셀프 테스트 — 두문자만 보고 써보기</h2><p>오른쪽 칸에 풀어서 써보세요. 막히면 숫자(장 번호)로 돌아가 확인!</p></div></div>
-<div class="q"><table>${quiz.map(([m, t, n]) => `<tr><td class="k">${m}</td><td>${t}</td><td class="b">${n}</td></tr>`).join('')}</table></div>
+<section style="--c:#495057"><div class="head"><div class="no">★</div><div><h2>셀프 테스트 — 그림·두문자만 보고 써보기</h2><p>그림을 보고 두문자를, 두문자를 보고 내용을 떠올려 오른쪽 칸에 풀어서 써보세요. 막히면 숫자(장 번호)로 돌아가 확인!</p></div></div>
+<div class="q"><table>${quiz.map(([m, t, n, e]) => `<tr><td class="pe">${e}</td><td class="k">${m}</td><td>${t}</td><td class="b">${n}</td></tr>`).join('')}</table></div>
 <div class="formula" style="margin-top:12px"><h3>🎯 마지막 한마디</h3>이 시험은 “얼마나 아느냐”보다 <b>“아는 걸 얼마나 정확한 단어로 쓰느냐”</b>의 시험입니다. 두문자 → 키워드 → 한 줄 설명. 이 순서로 손이 움직이면 60점은 넘습니다. 합격을 응원합니다! 🍀</div>
 </section>
 </body></html>`;
 
-module.exports={F,card,tbl,css:html.match(/<style>([\s\S]*?)<\/style>/)[1],fontDir};
+// Chromium의 다단(column) 인쇄가 카드를 다음 쪽으로 밀어내는 문제를 피하려고, 카드를 두 칸에 높이 순으로 직접 나눠 담는다
+const reflow = () => document.querySelectorAll('.cols').forEach(box => {
+  const cards = [...box.children];
+  box.style.cssText += ';column-count:auto;display:flex;gap:9px;align-items:flex-start';
+  const cols = [0, 1].map(() => { const d = document.createElement('div'); d.style.cssText = 'flex:1;min-width:0'; box.appendChild(d); return d; });
+  cards.forEach(c => cols[0].appendChild(c));
+  const h = cards.map(c => c.offsetHeight + 9), tot = h.reduce((a, x) => a + x, 0);
+  // 읽는 순서를 지키면서(앞쪽은 왼칸, 뒤쪽은 오른칸) 두 칸 높이 차가 가장 작은 지점에서 나눈다
+  let best = 0, bestMax = Infinity, run = 0;
+  for (let k = 0; k <= cards.length; k++) { const m = Math.max(run, tot - run); if (m < bestMax) { bestMax = m; best = k; } run += h[k] || 0; }
+  cards.slice(best).forEach(c => cols[1].appendChild(c));
+  // 한 쪽(약 1020px)을 넘는 장은 그 장만 살짝 축소해서 한 쪽에 맞춘다
+  const sec = box.closest('section'), LIM = 1015;
+  if (sec.scrollHeight <= LIM) return;
+  const inner = document.createElement('div');
+  while (sec.firstChild) inner.appendChild(sec.firstChild);
+  sec.appendChild(inner);
+  inner.style.transformOrigin = '0 0';
+  let z = 1;
+  for (let t = 0; t < 6; t++) {  // 폭을 넓힌 만큼 높이가 줄어드므로 몇 번 반복해서 맞춘다
+    inner.style.width = (100 / z) + '%';
+    const H = inner.scrollHeight;
+    if (H * z <= LIM) break;
+    z = Math.min(z, LIM / H) * 0.995;
+  }
+  inner.style.transform = `scale(${z})`;
+  sec.style.height = LIM + 'px'; sec.style.overflow = 'hidden';
+});
+module.exports={reflow,F,card,tbl,css:html.match(/<style>([\s\S]*?)<\/style>/)[1],fontDir};
 if(require.main===module)(async () => {
   const out = process.argv[2];
   fs.writeFileSync(path.join(__dirname, 'note.html'), html);
@@ -272,6 +317,8 @@ if(require.main===module)(async () => {
   const p = await b.newPage();
   await p.goto('file://' + path.join(__dirname, 'note.html'));
   await p.evaluate(() => document.fonts.ready);
+  await p.setViewportSize({ width: 718, height: 1035 }); await p.emulateMedia({ media: 'print' });
+  await p.evaluate(reflow);
   await p.pdf({ path: out, format: 'A4', printBackground: true, preferCSSPageSize: true });
   await b.close();
   console.log('ok', quiz.length);
