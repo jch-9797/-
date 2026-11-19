@@ -11,11 +11,16 @@ const b = read('build-written.js');
 const i0 = b.indexOf('const S = [];');
 const W = new Function('F', b.slice(i0, b.indexOf('const nMn')) + ';return S')(F);
 
+const PIC = require('./pictures.js'), used = new Set();
 const CLS = { '#1c7ed6': 'c1', '#2f9e44': 'c2', '#e8590c': 'c3', '#7048e8': 'c4', '#d6336c': 'c5' };
 const tidy = secs => secs.map(s => ({
   no: s.no, title: s.title, sub: s.sub, cls: CLS[s.color] || 'c1',
   short: s.title.replace(/^.*? [①-④] /, '').replace(/ \(.*/, ''),
-  cards: s.cards.map(({ t, m, s: st, i, table, tip, quote, face, who, img }) => ({ t, m, s: st, i, table, tip, quote, face, who, img })),
+  cards: s.cards.map(({ t, m, s: st, i, table, tip, quote, face, who, img }) => {
+    const pic = m && PIC[m] ? { sc: PIC[m][0], t: PIC[m][1].map(x => x.split('|')) } : undefined;
+    if (m) used.add(m); if (m && !pic) console.warn('그림 없음:', m);
+    return { t, m, s: st, i, table, tip, quote, face, who, img, pic };
+  }),
 }));
 
 // 보기 순서: PDF 문제집과 같은 번호가 되도록 같은 시드로 섞는다
@@ -42,4 +47,5 @@ if (out && extra) {
 }
 fs.writeFileSync(path.join(__dirname, '..', 'index.html'),
   '<!doctype html>\n<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>\n<script>window.__GICHUL=' + js(JSON.parse(gichul)) + '</script>\n' + page + '\n</body></html>\n');
-console.log('questions', q.length, 'cards', data.written.concat(data.practical).reduce((n, s) => n + s.cards.length, 0), 'bytes', page.length);
+Object.keys(PIC).filter(k => !used.has(k)).forEach(k => console.warn('쓰이지 않은 그림:', k));
+console.log('pictures', used.size, 'questions', q.length, 'cards', data.written.concat(data.practical).reduce((n, s) => n + s.cards.length, 0), 'bytes', page.length);

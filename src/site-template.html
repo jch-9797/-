@@ -199,6 +199,23 @@ textarea.inp{width:100%;min-height:170px;resize:vertical;line-height:1.7}
 .chk li{display:flex;gap:9px;align-items:baseline}
 .essay{max-width:760px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:14px}
 .essay .ncard{margin:0}
+.pic{margin:0 0 9px}
+.pic .scene{font-size:30px;letter-spacing:3px;line-height:1.25;margin-bottom:5px}
+.pic .scene small{font-size:12px;letter-spacing:0;color:var(--muted);margin-left:6px;vertical-align:middle}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:6px}
+.tile{background:var(--sunk);border-radius:9px;padding:6px 5px 7px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
+.tile .e{font-size:27px;line-height:1.2}
+.tile .sy{font-family:var(--display);color:var(--hl);font-size:17px;line-height:1.15}
+.tile .ct{font-size:12.5px;font-weight:700;line-height:1.3}
+.tile .cu{font-size:11.5px;color:var(--muted);line-height:1.3}
+.ncard .tile[data-k]{cursor:pointer}.ncard .tile[data-k]:hover{outline:1.5px solid var(--c)}
+.hiding .tile .ct,.hiding .tile .cu{filter:blur(5px);user-select:none}
+.hiding .tile.rv .ct,.hiding .tile.rv .cu{filter:none}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:13px;color:var(--muted)}
+.chain b{color:var(--ink);background:var(--sunk);border-radius:6px;padding:1px 8px;font-weight:700}
+.fpic .scene{font-size:clamp(42px,12vw,64px);letter-spacing:6px;line-height:1.2}
+.fpic .em{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;font-size:30px;margin-top:6px}
+.fpic .em span{background:var(--sunk);border-radius:10px;padding:4px 8px}
 .qimgnote{font-size:13px;color:var(--muted)}
 .ncard [data-k]{cursor:pointer}
 .ncard li[data-k]:hover,.ncard tr[data-k]:hover td,.who[data-k]:hover,.ncard h3[data-k]:hover{background:var(--sunk)}
@@ -249,7 +266,7 @@ const SEC = { w: D.written, p: D.practical };
 const ALL = [];
 for (const k of ['w', 'p']) SEC[k].forEach((s, si) => s.cards.forEach((c, ci) => { c.id = k + si + '-' + ci; c.sec = s; c.kind = k; ALL.push(c); }));
 const MN = ALL.filter(c => c.m);
-const ui = { q: '', ei: 0, eTodo: false, eShow: false, eHint: false, drafts: {}, src: 'g', round: null, sheet: null, tab: 'w', si: { w: 0, p: 0 }, fcKind: 'all', fcTodo: false, deck: null, fi: 0, fshow: false, askSubmit: false, onlyWrong: false, study: false, askReset: false };
+const ui = { fcFront: 'pic', q: '', ei: 0, eTodo: false, eShow: false, eHint: false, drafts: {}, src: 'g', round: null, sheet: null, tab: 'w', si: { w: 0, p: 0 }, fcKind: 'all', fcTodo: false, deck: null, fi: 0, fshow: false, askSubmit: false, onlyWrong: false, study: false, askReset: false };
 let tick = null;
 const fmt = s => { s = Math.max(0, s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' : '') + String(m).padStart(h ? 2 : 1, '0') + ':' + String(x).padStart(2, '0'); };
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -418,6 +435,11 @@ function reviewItem(q, a, extra = '') {
 
 /* ---------- 암기노트 ---------- */
 const hl = s => s.replace(/\[(.+?)\]/g, '<em>$1</em>');
+const CHAIN = '<div class="chain"><b>그림</b>→<b>두문자</b>→<b>내용</b>→<b>연상 단어</b>→<b>그림</b><span>장면 그림으로 두문자를, 각 칸의 글자로 내용을, 내용에서 연상 단어와 그림을 떠올리세요.</span></div>';
+function picStrip(c) {
+  return `<div class="pic"><div class="scene" aria-hidden="true">${c.pic.sc}<small>장면 그림</small></div><div class="tiles">${c.pic.t.map(([sy, ct, e, cu]) =>
+    `<div class="tile" data-rv data-k="${esc(ct)}" tabindex="0" role="button"><span class="e" aria-hidden="true">${e}</span><span class="sy">${esc(sy)}</span><span class="ct">${esc(ct)}</span>${cu ? `<span class="cu">${esc(cu)}</span>` : ''}</div>`).join('')}</div></div>`;
+}
 function noteCard(c, withCheck = true) {
   const K = x => esc(x.replace(/<[^>]+>/g, '').replace(/[\[\]]/g, '').replace(/&\w+;/g, ' ').trim());
   let h = `<article class="ncard ${c.sec.cls}">`;
@@ -425,6 +447,7 @@ function noteCard(c, withCheck = true) {
   h += `<h3 data-k="${K(c.t)}" tabindex="0" role="button">${c.t}</h3>`;
   if (c.quote) h += `<div class="quote">${c.quote}</div>`;
   if (c.m) h += `<div class="mn" data-rv><span class="k">${c.m}</span><span class="s">${c.s}</span></div>`;
+  if (c.pic) h += picStrip(c);
   if (c.i) h += `<ul>${c.i.map(([a, b]) => `<li data-rv data-k="${K(a)}" tabindex="0" role="button"><b>${hl(a)}</b><span>${hl(b)}</span></li>`).join('')}</ul>`;
   if (c.table) h += `<div class="tw" data-rv><table>${c.table.map((r, i) => `<tr${i ? ` data-k="${K(r[0])}" tabindex="0"` : ''}>${r.map(x => i ? `<td>${x}</td>` : `<th>${x}</th>`).join('')}</tr>`).join('')}</table></div>`;
   if (c.tip) h += `<div class="tip">${c.tip}</div>`;
@@ -451,7 +474,8 @@ function studyBody() {
 }
 function study() {
   return `
-  <div><h1 class="h2">암기노트</h1><p class="muted" style="margin:4px 0 0">빨간 글자가 두문자, 노란 상자가 연상 문장입니다. 단어·학자·제목을 누르면 자세한 설명과 관련 문제가 나옵니다.</p></div>
+  <div><h1 class="h2">암기노트</h1><p class="muted" style="margin:4px 0 0">빨간 글자가 두문자, 노란 상자가 연상 문장입니다. 단어·학자·제목·그림 칸을 누르면 자세한 설명과 관련 문제가 나옵니다.</p></div>
+  ${CHAIN}
   <input type="search" id="note-q" class="inp" placeholder="노트·용어 검색 (예: 전이, MMPI, 로저스)" aria-label="노트와 용어 검색" value="${esc(ui.q)}">
   <div id="study-body" style="display:flex;flex-direction:column;gap:20px">${studyBody()}</div>`;
 }
@@ -473,7 +497,7 @@ function essay() {
       <h2 class="h3" style="font-size:18px">${c.t.replace(/ — /, ': ')}의 핵심 내용을 쓰고, 각각 한 줄로 설명하시오.</h2>
       <p class="small muted" style="margin:4px 0 10px">모범답안은 ${c.i.length}줄입니다.</p>
       <textarea class="inp" id="essay-ans" placeholder="① 키워드: 한 줄 설명&#10;② …" aria-label="내 답안">${esc(txt)}</textarea>
-      <div class="row" style="margin-top:10px"><button class="btn sm" data-act="e-hint">${ui.eHint ? '힌트 숨기기' : '두문자 힌트 보기'}</button>${ui.eHint ? `<span class="mn" style="margin:0"><span class="k">${c.m}</span></span>` : ''}
+      <div class="row" style="margin-top:10px"><button class="btn sm" data-act="e-hint">${ui.eHint ? '힌트 숨기기' : '두문자 힌트 보기'}</button>${ui.eHint ? `<span class="mn" style="margin:0">${c.pic ? `<span style="font-size:22px">${c.pic.t.map(x => x[2]).join(' ')}</span>` : ''}<span class="k">${c.m}</span></span>` : ''}
         <span style="flex:1"></span><button class="btn pri" data-act="e-show">${ui.eShow ? '모범답안 접기' : '모범답안과 비교'}</button></div>
     </section>
     ${ui.eShow ? `<section class="panel"><h2 class="h3" style="margin-bottom:8px">키워드 확인 <span class="small muted" style="font-weight:400">${hits.filter(Boolean).length} / ${hits.length}개가 내 답안에 있습니다</span></h2>
@@ -493,12 +517,14 @@ function cards() {
   const pool = MN.filter(c => ui.fcKind === 'all' || c.kind === ui.fcKind), kn = pool.filter(c => st.known[c.id]).length;
   const id = ui.deck[ui.fi], c = ALL.find(x => x.id === id);
   return `<div class="fc">
-  <div><h1 class="h2">두문자 카드</h1><p class="muted" style="margin:4px 0 0">두문자를 보고 내용을 떠올린 뒤 카드를 뒤집어 확인하세요.</p></div>
+  <div><h1 class="h2">두문자 카드</h1><p class="muted" style="margin:4px 0 0">그림이나 두문자를 보고 내용을 떠올린 뒤 카드를 뒤집어 확인하세요.</p></div>
   <div class="row"><div class="seg"><button aria-pressed="${ui.fcKind === 'all'}" data-act="fck" data-v="all">전체</button><button aria-pressed="${ui.fcKind === 'w'}" data-act="fck" data-v="w">필기</button><button aria-pressed="${ui.fcKind === 'p'}" data-act="fck" data-v="p">실기</button></div>
+    <div class="seg" role="group" aria-label="카드 앞면"><button aria-pressed="${ui.fcFront === 'pic'}" data-act="fcf" data-v="pic">앞면: 그림</button><button aria-pressed="${ui.fcFront === 'm'}" data-act="fcf" data-v="m">앞면: 두문자</button></div>
     <label class="kn" style="margin:0"><input type="checkbox" id="fc-todo" data-act-change="fctodo" ${ui.fcTodo ? 'checked' : ''}> 못 외운 것만</label></div>
   <div><div class="prog"><i style="width:${pool.length ? kn / pool.length * 100 : 0}%"></i></div><div class="small muted" style="margin-top:4px">${kn} / ${pool.length}개 외움${c ? ` · 이번 묶음 ${ui.fi + 1} / ${ui.deck.length}` : ''}</div></div>
   ${c ? `<div class="fcard ${c.sec.cls}">
-      ${ui.fshow ? noteCard(c, false) : `<span class="chip" style="align-self:center">${c.kind === 'w' ? '필기' : '실기'} ${c.sec.no}장 · ${c.sec.short}</span><div class="k">${c.m}</div><div class="h3">${c.t}</div>`}
+      ${ui.fshow ? noteCard(c, false) : ui.fcFront === 'pic' && c.pic ? `<span class="chip" style="align-self:center">${c.kind === 'w' ? '필기' : '실기'} ${c.sec.no}장</span><div class="fpic"><div class="scene">${c.pic.sc}</div><div class="em">${c.pic.t.map(x => `<span>${x[2]}</span>`).join('')}</div></div><div class="small muted">이 그림은 어떤 두문자일까요? 각 그림이 어떤 내용인지도 떠올려 보세요.</div>`
+      : `<span class="chip" style="align-self:center">${c.kind === 'w' ? '필기' : '실기'} ${c.sec.no}장 · ${c.sec.short}</span><div class="k">${c.m}</div><div class="h3">${c.t}</div>`}
     </div>
     ${ui.fshow ? `<div class="row" style="justify-content:center"><button class="btn" data-act="fc-no">아직 헷갈려요</button><button class="btn pri" data-act="fc-yes">외웠어요</button></div>`
       : `<div class="row" style="justify-content:center"><button class="btn pri" data-act="fc-flip">뒤집어서 확인</button><button class="btn" data-act="fc-skip">건너뛰기</button></div>`}`
@@ -622,6 +648,7 @@ app.addEventListener('click', e => {
   else if (a === 'hide') { st.hide = !st.hide; save(); }
   else if (a === 'fck') { ui.fcKind = b.dataset.v; buildDeck(); }
   else if (a === 'fc-flip') ui.fshow = true;
+  else if (a === 'fcf') ui.fcFront = b.dataset.v;
   else if (a === 'fc-skip') { ui.fi++; ui.fshow = false; }
   else if (a === 'fc-yes' || a === 'fc-no') { const id = ui.deck[ui.fi]; a === 'fc-yes' ? st.known[id] = 1 : delete st.known[id]; ui.fi++; ui.fshow = false; save(); }
   else if (a === 'fc-again') buildDeck();
