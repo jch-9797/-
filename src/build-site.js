@@ -33,8 +33,13 @@ const data = { subj: SUBJ.map(x => x[0]), q, written: tidy(W), practical: tidy(P
 const js = x => JSON.stringify(x).replace(/</g, '\\u003c');
 const page = read('site-template.html').replace('/*DATA*/null', () => js(data)).replace('/*GLOSS*/[]', () => js(require('./glossary.js')));
 const gichul = fs.readFileSync(path.join(__dirname, '..', 'gichul', 'gichul.json'), 'utf8');
-const out = process.argv[2];
+const out = process.argv[2], extra = process.argv[3];
 if (out) fs.writeFileSync(out, page);
+// 복원 문제(해설 포함)는 공개 저장소에 두지 않고, 게시용 데이터 파일에만 합친다
+if (out && extra) {
+  const g = JSON.parse(gichul), x = JSON.parse(fs.readFileSync(extra, 'utf8'));
+  fs.writeFileSync(path.join(path.dirname(out), 'gichul.json'), JSON.stringify({ subj: g.subj, rounds: x.rounds.concat(g.rounds), q: x.q.concat(g.q) }));
+}
 fs.writeFileSync(path.join(__dirname, '..', 'index.html'),
   '<!doctype html>\n<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>\n<script>window.__GICHUL=' + js(JSON.parse(gichul)) + '</script>\n' + page + '\n</body></html>\n');
 console.log('questions', q.length, 'cards', data.written.concat(data.practical).reduce((n, s) => n + s.cards.length, 0), 'bytes', page.length);

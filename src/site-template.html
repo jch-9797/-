@@ -222,7 +222,8 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const qT = q => q.g ? esc(q.q).replace(/\n/g, '<br>') : q.q;
 const oT = (q, i) => q.g ? esc(q.o[i]) : q.o[i];
 const rLabel = id => { const r = G && G.rounds.find(x => x.id === id); return r ? r.label : ''; };
-const srcChip = q => `<span class="chip">${q.g ? '기출 ' + q.r.slice(2, 6) + '.' + +q.r.slice(6, 8) + '.' + +q.r.slice(8) : '예상문제'}</span>`;
+const srcChip = q => `<span class="chip">${!q.g ? '예상문제' : q.r.startsWith('mc') ? '복원 ' + q.r.slice(2).replace('-', '년 ') + '회' : '기출 ' + q.r.slice(2, 6) + '.' + +q.r.slice(6, 8) + '.' + +q.r.slice(8)}</span>`;
+const eT = q => !q.e ? '' : q.g ? esc(q.e) : q.e;
 const KEY = 'cp2-state-v1';
 let st = { known: {}, wrong: {}, hist: [], cur: null, last: null, hide: false };
 try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
@@ -251,7 +252,7 @@ function home() {
   <section class="hero">
     <div class="panel">
       <h1>문제 풀고, <span>두문자</span>로 외우고,<br>틀린 것만 다시.</h1>
-      <p>${G ? `필기 기출문제 ${G.q.length}문항(${G.rounds.length}회차)과 ` : '필기 '}예상문제 100문항으로 모의시험을 보고, 필기·실기 암기노트로 외웁니다. 진도와 오답은 이 기기의 브라우저에 저장됩니다.</p>
+      <p>${G ? `필기 기출·복원 문제 ${G.q.length}문항(${G.rounds.length}회차)과 ` : '필기 '}예상문제 100문항으로 모의시험을 보고, 필기·실기 암기노트로 외웁니다. 진도와 오답은 이 기기의 브라우저에 저장됩니다.</p>
       <div class="row">
         <a class="btn pri" href="#exam">${st.cur ? '풀던 시험 이어서 하기' : '모의시험 시작'}</a>
         <a class="btn" href="#cards">두문자 카드 외우기</a>
@@ -276,7 +277,7 @@ function home() {
   </section>
   ${st.hist.length ? `<section class="panel"><h2 class="h3">최근 기록</h2><div class="tw"><table class="hist"><tr><th>날짜</th><th>시험</th><th>맞힌 수</th><th>결과</th></tr>
     ${st.hist.slice(0, 8).map(h => `<tr><td>${new Date(h.t).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })}</td><td>${h.label}</td><td>${h.c} / ${h.n}</td><td>${h.pass == null ? '<span class="muted">–</span>' : h.pass ? '<span class="pill ok">합격선</span>' : '<span class="pill bad">미달</span>'}</td></tr>`).join('')}</table></div></section>` : ''}
-  <footer>기출문제는 2017~2022년 시행분의 문제와 정답이며 해설은 없습니다. 지문에 그림이 필요한 문항은 빠져 있습니다. 예상문제는 출제 범위의 핵심 개념으로 직접 만든 것입니다. 시험 일정과 세부 기준은 Q-Net 공고를 확인하세요.
+  <footer>2017~2022년 기출은 문제와 정답만 있고, 2025~2026년 회차는 복원 문제(출처: 모두CBT)로 해설이 있습니다. 지문을 구하지 못한 문항은 빠져 있습니다. 예상문제는 출제 범위의 핵심 개념으로 직접 만든 것입니다. 시험 일정과 세부 기준은 Q-Net 공고를 확인하세요.
     <div class="row" style="margin-top:8px">${ui.askReset ? `<span>진도·오답·기록을 모두 지울까요?</span><button class="btn sm" data-act="reset-yes">모두 지우기</button><button class="btn sm" data-act="reset-no">취소</button>` : `<button class="btn sm" data-act="reset-ask">학습 기록 초기화</button>`}</div>
   </footer>`;
 }
@@ -304,7 +305,7 @@ function examSetup() {
     ${g ? D.subj.map((x, i) => `<button class="pick c${i + 1}" data-act="start" data-m="r${i}"><b>${x} 랜덤 20</b><span>기출 전 회차에서 이 과목만 · ${tm(20)}</span></button>`).join('') : ''}
     <button class="pick" data-act="start" data-m="wrong" ${nw ? '' : 'disabled'}><b>오답만 다시 풀기</b><span>${nw ? nw + '문항 · 시간 제한 없음' : '아직 오답이 없습니다'}</span></button>
   </div>
-  ${g ? '<p class="small muted" style="margin:0">기출은 문제와 정답만 있고 해설은 없습니다. 지문에 그림이 필요한 문항은 빠져 있어 회차마다 문항 수가 100보다 적습니다.</p>' : ''}`}
+  ${g ? '<p class="small muted" style="margin:0">2025~2026년 회차는 수험생 기억으로 복원한 문제라 실제 문항과 다를 수 있고, 해설이 붙어 있습니다. 2017~2022년 기출은 문제와 정답만 있습니다. 지문을 구하지 못한 문항은 빠져 있어 문항 수가 100보다 적은 회차가 있습니다.</p>' : ''}`}
   ${st.last ? `<div class="row"><button class="btn" data-act="show-last">지난 결과 다시 보기</button></div>` : ''}`;
 }
 function startExam(m) {
@@ -338,7 +339,7 @@ function examRun() {
       <div class="row"><span class="chip">${D.subj[q.s]}</span>${srcChip(q)}<span class="small muted">${c.i + 1} / ${c.ids.length}</span></div>
       <div class="qt"><i>${q.n}.</i><span>${qT(q)}</span></div>
       <div class="opts">${q.o.map((t, i) => `<button class="opt ${locked ? (i === q.a ? 'right' : i === a ? 'wrong' : '') : (i === a ? 'sel' : '')}" data-act="ans" data-i="${i}" ${locked ? 'disabled' : ''}><span class="b">${i + 1}</span><span>${oT(q, i)}</span></button>`).join('')}</div>
-      ${locked ? `<div class="exp"><b class="v ${a === q.a ? 'okc' : 'badc'}">${a === q.a ? '정답입니다.' : '오답입니다. 정답은 ' + C[q.a] + '번.'}</b> ${q.e || ''}</div>` : ''}
+      ${locked ? `<div class="exp"><b class="v ${a === q.a ? 'okc' : 'badc'}">${a === q.a ? '정답입니다.' : '오답입니다. 정답은 ' + C[q.a] + '번.'}</b> ${eT(q)}</div>` : ''}
       <div class="row qnav"><button class="btn" data-act="prev" ${c.i ? '' : 'disabled'}>이전</button>
         <button class="btn sm" data-act="flag">${c.flag[n] ? '표시 해제' : '나중에 다시 보기'}</button>
         <button class="btn ${a != null ? 'pri' : ''}" data-act="next" ${c.i < c.ids.length - 1 ? '' : 'disabled'}>다음</button></div>
@@ -379,7 +380,7 @@ function reviewItem(q, a, extra = '') {
   return `<div class="ritem ${ok || a === undefined && extra ? '' : 'x'}"><div class="row" style="margin-bottom:4px"><span class="chip c${q.s + 1}">${D.subj[q.s]}</span>${srcChip(q)}${extra}</div>
     <div class="q">${q.n}. ${qT(q)}</div>
     <ol>${q.o.map((t, i) => `<li class="${i === q.a ? 'ans' : i === a ? 'mine' : ''}">${C[i]} ${oT(q, i)}${i === q.a ? ' (정답)' : i === a ? ' (내 답)' : ''}</li>`).join('')}</ol>
-    ${a == null && !extra ? '<div class="small muted" style="margin-bottom:6px">답을 고르지 않았습니다.</div>' : ''}${q.e ? `<div class="e">${q.e}</div>` : ''}</div>`;
+    ${a == null && !extra ? '<div class="small muted" style="margin-bottom:6px">답을 고르지 않았습니다.</div>' : ''}${q.e ? `<div class="e">${eT(q)}</div>` : ''}</div>`;
 }
 
 /* ---------- 암기노트 ---------- */
