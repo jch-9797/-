@@ -30,9 +30,11 @@ for (let s = 0; s < 5; s++) {
   }
 }
 const data = { subj: SUBJ.map(x => x[0]), q, written: tidy(W), practical: tidy(P) };
-const page = read('site-template.html').replace('/*DATA*/null', () => JSON.stringify(data).replace(/</g, '\\u003c'));
+const js = x => JSON.stringify(x).replace(/</g, '\\u003c');
+const page = read('site-template.html').replace('/*DATA*/null', () => js(data)).replace('/*GLOSS*/[]', () => js(require('./glossary.js')));
+const gichul = fs.readFileSync(path.join(__dirname, '..', 'gichul', 'gichul.json'), 'utf8');
 const out = process.argv[2];
 if (out) fs.writeFileSync(out, page);
 fs.writeFileSync(path.join(__dirname, '..', 'index.html'),
-  '<!doctype html>\n<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>\n' + page + '\n</body></html>\n');
+  '<!doctype html>\n<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>\n<script>window.__GICHUL=' + js(JSON.parse(gichul)) + '</script>\n' + page + '\n</body></html>\n');
 console.log('questions', q.length, 'cards', data.written.concat(data.practical).reduce((n, s) => n + s.cards.length, 0), 'bytes', page.length);
