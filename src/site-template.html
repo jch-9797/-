@@ -65,7 +65,7 @@ main{max-width:1040px;margin:0 auto;padding-block:22px 60px;padding-left:max(16p
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
 .stat b{display:block;font-family:var(--display);font-weight:400;font-size:26px;font-variant-numeric:tabular-nums;line-height:1.2}
 .stat span{font-size:12px;color:var(--muted)}
-.ways{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.ways{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
 .way{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px;border-top:4px solid var(--c)}
 .way:hover{border-color:var(--c)}
 .way b{font-family:var(--display);font-weight:400;font-size:18px}
@@ -188,6 +188,17 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
 }
 @media (max-width:460px){.picks{grid-template-columns:1fr}.score{grid-template-columns:1fr}.bar{grid-template-columns:70px 1fr 64px}.ncard li{grid-template-columns:1fr;gap:0}.ncard li>span{color:var(--muted)}}
 @media (prefers-reduced-motion:no-preference){.opt,.btn,.way,.pick{transition:border-color .12s,background .12s}}
+.inp{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 11px;font:inherit;min-width:0}
+textarea.inp{width:100%;min-height:170px;resize:vertical;line-height:1.7}
+.dday{font-family:var(--display);font-size:22px;color:var(--omr)}
+.hot{display:flex;flex-wrap:wrap;gap:6px}
+.hot button{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:4px 12px;font-size:13px}
+.hot button:hover{border-color:var(--omr)}
+.hot button b{color:var(--omr);font-variant-numeric:tabular-nums;margin-left:5px}
+.chk{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.chk li{display:flex;gap:9px;align-items:baseline}
+.essay{max-width:760px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:14px}
+.essay .ncard{margin:0}
 .qimgnote{font-size:13px;color:var(--muted)}
 .ncard [data-k]{cursor:pointer}
 .ncard li[data-k]:hover,.ncard tr[data-k]:hover td,.who[data-k]:hover,.ncard h3[data-k]:hover{background:var(--sunk)}
@@ -208,7 +219,7 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
 <header class="top"><div class="in">
   <a class="brand" href="#home">임상심리사 2급 <b>합격노트</b></a>
   <nav id="nav">
-    <a href="#home" data-v="home">홈</a><a href="#exam" data-v="exam">모의시험</a><a href="#study" data-v="study">암기노트</a><a href="#cards" data-v="cards">두문자 카드</a><a href="#wrong" data-v="wrong">오답노트</a>
+    <a href="#home" data-v="home">홈</a><a href="#exam" data-v="exam">모의시험</a><a href="#study" data-v="study">암기노트</a><a href="#cards" data-v="cards">두문자 카드</a><a href="#essay" data-v="essay">서술형 연습</a><a href="#wrong" data-v="wrong">오답노트</a>
   </nav>
 </div></header>
 <main id="app"></main>
@@ -225,7 +236,8 @@ const rLabel = id => { const r = G && G.rounds.find(x => x.id === id); return r 
 const srcChip = q => `<span class="chip">${!q.g ? '예상문제' : q.r.startsWith('mc') ? '복원 ' + q.r.slice(2).replace('-', '년 ') + '회' : '기출 ' + q.r.slice(2, 6) + '.' + +q.r.slice(6, 8) + '.' + +q.r.slice(8)}</span>`;
 const eT = q => !q.e ? '' : q.g ? esc(q.e) : q.e;
 const KEY = 'cp2-state-v1';
-let st = { known: {}, wrong: {}, hist: [], cur: null, last: null, hide: false };
+const fresh = () => ({ known: {}, wrong: {}, hist: [], cur: null, last: null, hide: false, essay: {}, acc: {}, dday: '' });
+let st = fresh();
 try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
 const $ = (s, r = document) => r.querySelector(s);
@@ -237,17 +249,30 @@ const SEC = { w: D.written, p: D.practical };
 const ALL = [];
 for (const k of ['w', 'p']) SEC[k].forEach((s, si) => s.cards.forEach((c, ci) => { c.id = k + si + '-' + ci; c.sec = s; c.kind = k; ALL.push(c); }));
 const MN = ALL.filter(c => c.m);
-const ui = { src: 'g', round: null, sheet: null, tab: 'w', si: { w: 0, p: 0 }, fcKind: 'all', fcTodo: false, deck: null, fi: 0, fshow: false, askSubmit: false, onlyWrong: false, study: false, askReset: false };
+const ui = { q: '', ei: 0, eTodo: false, eShow: false, eHint: false, drafts: {}, src: 'g', round: null, sheet: null, tab: 'w', si: { w: 0, p: 0 }, fcKind: 'all', fcTodo: false, deck: null, fi: 0, fshow: false, askSubmit: false, onlyWrong: false, study: false, askReset: false };
 let tick = null;
 const fmt = s => { s = Math.max(0, s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' : '') + String(m).padStart(h ? 2 : 1, '0') + ':' + String(x).padStart(2, '0'); };
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-const view = () => { const h = location.hash.slice(1); return ['home', 'exam', 'study', 'cards', 'wrong'].includes(h) ? h : 'home'; };
+const ES = SEC.p.flatMap(x => x.cards).filter(c => c.m && c.i && c.i.length >= 2); // 서술형 연습 대상
+ALL.forEach(c => c.txt = [c.t, c.m, c.s, c.who, c.tip, c.quote].concat((c.i || []).flat(), (c.table || []).flat()).filter(Boolean).join(' ').replace(/<[^>]+>|[\[\]]/g, '').toLowerCase());
+const gTerms = g => g.s || g.k.map(x => x.replace(/^=/, ''));
+let hotCache = null;
+function hot() {
+  if (!G) return [];
+  if (!hotCache) hotCache = GL.map((g, i) => { const t = gTerms(g); return { i, g, n: G.q.filter(q => t.some(x => q.q.includes(x) || q.o.some(o => o.includes(x)))).length }; }).filter(x => x.n).sort((a, b) => b.n - a.n).slice(0, 24);
+  return hotCache;
+}
+const view = () => { const h = location.hash.slice(1); return ['home', 'exam', 'study', 'cards', 'essay', 'wrong'].includes(h) ? h : 'home'; };
 const go = v => { if (view() === v) render(); else location.hash = v; };
 
 /* ---------- 홈 ---------- */
 function home() {
   const known = MN.filter(c => st.known[c.id]).length, wrong = wrongIds().length;
   const lastFull = st.hist.find(h => h.mode === 'full');
+  const dd = st.dday ? Math.ceil((new Date(st.dday + 'T00:00:00') - new Date(new Date().toDateString())) / 864e5) : null;
+  const acc = [0, 1, 2, 3, 4].map(i => st.acc[i] || [0, 0]), anyAcc = acc.some(a => a[1]);
+  const weak = acc.map((a, i) => [a[1] >= 5 ? a[0] / a[1] : 9, i]).sort((a, b) => a[0] - b[0])[0];
+  const essayDone = ES.filter(c => st.essay[c.id]).length;
   return `
   <section class="hero">
     <div class="panel">
@@ -257,6 +282,7 @@ function home() {
         <a class="btn pri" href="#exam">${st.cur ? '풀던 시험 이어서 하기' : '모의시험 시작'}</a>
         <a class="btn" href="#cards">두문자 카드 외우기</a>
       </div>
+      <div class="row" style="margin-top:14px"><label class="small muted" for="dday">내 시험일</label><input type="date" id="dday" class="inp" style="padding:5px 9px" value="${esc(st.dday || '')}">${dd == null ? '' : `<span class="dday">${dd > 0 ? 'D-' + dd : dd === 0 ? 'D-DAY' : '시험일이 지났습니다'}</span>`}</div>
     </div>
     <div class="stats">
       <div class="stat"><b>${lastFull ? Math.round(lastFull.c / lastFull.n * 100) : '–'}</b><span>최근 전체 모의시험 점수</span></div>
@@ -269,8 +295,14 @@ function home() {
     <a class="way c1" href="#exam"><b>모의시험</b><span>기출 회차별 전체 시험이나 과목별 시험. 답을 고르면 바로 정답을 보여 주는 학습 모드도 있습니다.</span></a>
     <a class="way c2" href="#study"><b>암기노트</b><span>필기 6장, 실기 11장. 단어나 학자를 누르면 자세한 설명과 관련 기출이 나옵니다.</span></a>
     <a class="way c3" href="#cards"><b>두문자 카드</b><span>${MN.length}개 암기법을 한 장씩. 못 외운 것만 골라 반복합니다.</span></a>
+    <a class="way c4" href="#essay"><b>서술형 연습</b><span>실기 대비. 직접 써 보고 모범답안과 키워드를 비교합니다. ${essayDone} / ${ES.length} 완료.</span></a>
     <a class="way c5" href="#wrong"><b>오답노트</b><span>틀린 문제가 자동으로 모입니다. 다시 맞히면 목록에서 빠집니다.</span></a>
   </section>
+  ${anyAcc ? `<section class="panel"><h2 class="h3" style="margin-bottom:10px">과목별 누적 정답률 <span class="small muted" style="font-weight:400">지금까지 푼 모든 문제 기준, 점선은 40%</span></h2>
+    <div class="bars">${acc.map((a, i) => `<div class="bar c${i + 1}"><span>${D.subj[i]}</span><div class="tr"><i style="width:${a[1] ? a[0] / a[1] * 100 : 0}%"></i></div><span class="v">${a[1] ? Math.round(a[0] / a[1] * 100) + '%' : '–'}</span></div>`).join('')}</div>
+    ${weak[0] < 9 ? `<div class="row" style="margin-top:12px"><span>가장 약한 과목은 <b>${D.subj[weak[1]]}</b>입니다.</span><button class="btn sm" data-act="weak" data-i="${weak[1]}">이 과목 20문항 풀기</button></div>` : ''}</section>` : ''}
+  ${hot().length ? `<section class="panel"><h2 class="h3" style="margin-bottom:4px">기출에 자주 나온 개념</h2><p class="small muted" style="margin:0 0 10px">숫자는 그 개념이 나온 기출·복원 문항 수입니다. 누르면 설명과 문제를 볼 수 있습니다.</p>
+    <div class="hot">${hot().map(x => `<button data-gl="${x.i}">${esc(x.g.t.replace(/ \(.*/, ''))}<b>${x.n}</b></button>`).join('')}</div></section>` : ''}
   <section class="info">
     <div class="panel"><h2 class="h3">필기시험</h2><dl><dt>형식</dt><dd>객관식 4지 택일, 100문항</dd><dt>시간</dt><dd>2시간 30분</dd><dt>과목</dt><dd>${D.subj.join(' · ')}</dd><dt>합격</dt><dd>과목당 40점 이상, 평균 60점 이상</dd></dl></div>
     <div class="panel"><h2 class="h3">실기시험</h2><dl><dt>형식</dt><dd>필답형(서술형)</dd><dt>시간</dt><dd>3시간</dd><dt>합격</dt><dd>100점 만점에 60점 이상</dd><dt>답안</dt><dd>번호 + 키워드 + 한 줄 설명</dd></dl></div>
@@ -356,6 +388,7 @@ function submitExam() {
   if (c.mode === 'full') pass = ok / c.ids.length >= 0.6 && per.every((x, i) => !tot[i] || x / tot[i] >= 0.4);
   else if (c.mode !== 'wrong') pass = ok / c.ids.length >= 0.6;
   const r = { t: Date.now(), mode: c.mode, label: c.label, ids: c.ids, ans: c.ans, n: c.ids.length, c: ok, per, tot, pass, used: Math.floor((Date.now() - c.start) / 1000) };
+  for (const id of c.ids) { const q = QN[id], a = st.acc[q.s] || (st.acc[q.s] = [0, 0]); a[1]++; if (c.ans[id] === q.a) a[0]++; }
   st.last = r; st.hist.unshift({ t: r.t, mode: r.mode, label: r.label, n: r.n, c: r.c, pass }); st.hist = st.hist.slice(0, 20);
   st.cur = null; ui.askSubmit = false; ui.result = true; ui.onlyWrong = ok < c.ids.length; save(); render(); scrollTo(0, 0);
 }
@@ -398,17 +431,59 @@ function noteCard(c, withCheck = true) {
   if (c.m && withCheck) h += `<label class="kn"><input type="checkbox" id="kn-${c.id}" data-known="${c.id}" ${st.known[c.id] ? 'checked' : ''}> 외웠어요</label>`;
   return h + `</article>`;
 }
-function study() {
+function studyBody() {
+  const q = ui.q.trim().toLowerCase();
+  if (q) {
+    const gl = GL.map((g, i) => [g, i]).filter(([g]) => g.t.toLowerCase().includes(q) || g.k.some(k => k.toLowerCase().includes(q))).slice(0, 12);
+    const cs = ALL.filter(c => c.txt.includes(q));
+    return `${gl.length ? `<div><h2 class="h3" style="margin-bottom:8px">용어·학자</h2><div class="hot">${gl.map(([g, i]) => `<button data-gl="${i}">${esc(g.t)}</button>`).join('')}</div></div>` : ''}
+    <h2 class="h3">노트 카드 ${cs.length}개${cs.length > 30 ? ' (앞의 30개만 표시)' : ''}</h2>
+    ${cs.length ? `<div class="cards">${cs.slice(0, 30).map(c => noteCard(c)).join('')}</div>` : '<div class="panel empty">찾는 내용이 노트에 없습니다. 다른 낱말로 검색해 보세요.</div>'}`;
+  }
   const secs = SEC[ui.tab], s = secs[ui.si[ui.tab]];
-  return `
-  <div><h1 class="h2">암기노트</h1><p class="muted" style="margin:4px 0 0">빨간 글자가 두문자, 노란 상자가 연상 문장입니다. 단어·학자·제목을 누르면 자세한 설명과 관련 문제가 나옵니다.</p></div>
-  <div class="row"><div class="seg"><button aria-pressed="${ui.tab === 'w'}" data-act="tab" data-v="w">필기 (6장)</button><button aria-pressed="${ui.tab === 'p'}" data-act="tab" data-v="p">실기 (11장)</button></div>
+  return `<div class="row"><div class="seg"><button aria-pressed="${ui.tab === 'w'}" data-act="tab" data-v="w">필기 (6장)</button><button aria-pressed="${ui.tab === 'p'}" data-act="tab" data-v="p">실기 (11장)</button></div>
     <button class="btn sm" data-act="hide" aria-pressed="${!!st.hide}">${st.hide ? '설명 모두 보기' : '설명 가리고 떠올리기'}</button>
     ${st.hide ? '<span class="small muted">흐린 부분을 누르면 보입니다.</span>' : ''}</div>
   <div class="secs">${secs.map((x, i) => `<button class="${x.cls}" aria-pressed="${i === ui.si[ui.tab]}" data-act="sec" data-i="${i}">${x.no}. ${x.short}</button>`).join('')}</div>
   <div class="sechead ${s.cls}"><h2 class="h3">${s.title}</h2><p>${s.sub}</p></div>
   <div class="cards ${st.hide ? 'hiding' : ''}">${s.cards.map(c => noteCard(c)).join('')}</div>
   <div class="row" style="justify-content:space-between"><button class="btn" data-act="sec" data-i="${ui.si[ui.tab] - 1}" ${ui.si[ui.tab] ? '' : 'disabled'}>이전 장</button><button class="btn" data-act="sec" data-i="${ui.si[ui.tab] + 1}" ${ui.si[ui.tab] < secs.length - 1 ? '' : 'disabled'}>다음 장</button></div>`;
+}
+function study() {
+  return `
+  <div><h1 class="h2">암기노트</h1><p class="muted" style="margin:4px 0 0">빨간 글자가 두문자, 노란 상자가 연상 문장입니다. 단어·학자·제목을 누르면 자세한 설명과 관련 문제가 나옵니다.</p></div>
+  <input type="search" id="note-q" class="inp" placeholder="노트·용어 검색 (예: 전이, MMPI, 로저스)" aria-label="노트와 용어 검색" value="${esc(ui.q)}">
+  <div id="study-body" style="display:flex;flex-direction:column;gap:20px">${studyBody()}</div>`;
+}
+
+/* ---------- 실기 서술형 연습 ---------- */
+const norm = x => x.toLowerCase().replace(/[\s\-·()‘’“”'".,]/g, '');
+const kwVar = a => a.replace(/[\[\]]/g, '').replace(/<[^>]+>/g, '').split(/[·\/()→,]| vs /).map(x => x.trim()).filter(x => x.length >= 2);
+function essay() {
+  const list = ES.filter(c => !ui.eTodo || !st.essay[c.id]), done = ES.filter(c => st.essay[c.id]).length;
+  if (ui.ei >= list.length) ui.ei = 0;
+  const c = list[ui.ei], txt = c ? ui.drafts[c.id] || '' : '', nt = norm(txt);
+  const hits = c && ui.eShow ? c.i.map(([a]) => kwVar(a).some(v => nt.includes(norm(v)))) : [];
+  return `<div class="essay">
+  <div><h1 class="h2">실기 서술형 연습</h1><p class="muted" style="margin:4px 0 0">실기는 손으로 쓰는 시험입니다. 보지 않고 먼저 써 본 뒤 모범답안과 비교하세요. “번호 + 키워드 + 한 줄 설명” 형식으로 씁니다.</p></div>
+  <div class="row"><div class="seg"><button aria-pressed="${!ui.eTodo}" data-act="e-todo" data-v="0">전체 ${ES.length}문제</button><button aria-pressed="${ui.eTodo}" data-act="e-todo" data-v="1">아직 못 쓴 것만</button></div></div>
+  <div><div class="prog"><i style="width:${done / ES.length * 100}%"></i></div><div class="small muted" style="margin-top:4px">${done} / ${ES.length}문제 완료${c ? ` · 지금 ${ui.ei + 1} / ${list.length}` : ''}</div></div>
+  ${c ? `<section class="panel ${c.sec.cls}" style="border-top:5px solid var(--c)">
+      <div class="row" style="margin-bottom:8px"><span class="chip">실기 ${c.sec.no}장 · ${c.sec.short}</span>${st.essay[c.id] ? '<span class="pill ok">완료</span>' : ''}</div>
+      <h2 class="h3" style="font-size:18px">${c.t.replace(/ — /, ': ')}의 핵심 내용을 쓰고, 각각 한 줄로 설명하시오.</h2>
+      <p class="small muted" style="margin:4px 0 10px">모범답안은 ${c.i.length}줄입니다.</p>
+      <textarea class="inp" id="essay-ans" placeholder="① 키워드: 한 줄 설명&#10;② …" aria-label="내 답안">${esc(txt)}</textarea>
+      <div class="row" style="margin-top:10px"><button class="btn sm" data-act="e-hint">${ui.eHint ? '힌트 숨기기' : '두문자 힌트 보기'}</button>${ui.eHint ? `<span class="mn" style="margin:0"><span class="k">${c.m}</span></span>` : ''}
+        <span style="flex:1"></span><button class="btn pri" data-act="e-show">${ui.eShow ? '모범답안 접기' : '모범답안과 비교'}</button></div>
+    </section>
+    ${ui.eShow ? `<section class="panel"><h2 class="h3" style="margin-bottom:8px">키워드 확인 <span class="small muted" style="font-weight:400">${hits.filter(Boolean).length} / ${hits.length}개가 내 답안에 있습니다</span></h2>
+      <ul class="chk">${c.i.map(([a], i) => `<li><span class="pill ${hits[i] ? 'ok' : 'bad'}">${hits[i] ? '썼음' : '빠짐'}</span><span>${hl(a)}</span></li>`).join('')}</ul>
+      <p class="small muted" style="margin:10px 0 0">글자가 일치하는지만 보는 간단한 확인입니다. 설명이 맞는지는 아래 모범답안과 직접 비교하세요.</p></section>
+      ${noteCard(c, false)}
+      <div class="row" style="justify-content:center"><button class="btn" data-act="e-no">다시 연습할게요</button><button class="btn pri" data-act="e-ok">잘 썼어요, 다음 문제</button></div>` : ''}
+    <div class="row" style="justify-content:space-between"><button class="btn sm" data-act="e-prev">이전 문제</button><button class="btn sm" data-act="e-next">건너뛰기</button></div>`
+    : '<div class="panel empty">모든 문제를 완료했습니다. “전체”로 바꾸면 다시 연습할 수 있습니다.</div>'}
+  </div>`;
 }
 
 /* ---------- 두문자 카드 ---------- */
@@ -472,6 +547,7 @@ function openDetail(el) {
   ui.sheet = { k, ctx: el.tagName === 'H3' ? '' : ctx, desc, g, rel: related(terms), more: 4 };
   renderSheet();
 }
+function openGloss(g) { ui.sheet = { k: g.t, ctx: '', desc: '', g, rel: related(gTerms(g)), more: 4 }; renderSheet(); }
 function renderSheet() {
   const box = $('#sheet'), x = ui.sheet;
   if (!x) { box.hidden = true; box.innerHTML = ''; document.body.style.overflow = ''; return; }
@@ -502,7 +578,7 @@ function render() {
   if (st.cur && st.cur.ids.some(id => !QN[id])) { if (G === null && v === 'exam') { app.innerHTML = '<div class="panel empty">문제를 불러오는 중입니다.</div>'; return; } if (G !== null) { st.cur = null; save(); } }
   if (v === 'exam' && st.cur && st.cur.ids.some(id => !QN[id])) return;
   if (v === 'exam') h = st.cur ? examRun() : (ui.result && st.last ? examResult() : examSetup());
-  else h = { home, study, cards, wrong }[v]();
+  else h = { home, study, cards, essay, wrong }[v]();
   app.innerHTML = h;
   if (v === 'exam' && st.cur && st.cur.dur) tick = setInterval(() => { const r = remain(), el = $('#timer'); if (r <= 0) return submitExam(); if (el) el.textContent = fmt(r); }, 1000);
 }
@@ -511,10 +587,21 @@ function answer(i) { const c = st.cur, n = c.ids[c.i]; if (c.study && c.ans[n] !
 app.addEventListener('click', e => {
   const rv = e.target.closest('.hiding [data-rv]'); if (rv) rv.classList.add('rv');
   const kEl = e.target.closest('.ncard [data-k]'); if (kEl && !e.target.closest('label,input,button,a') && !(rv && kEl.closest('.hiding'))) return openDetail(kEl);
+  const gl = e.target.closest('[data-gl]'); if (gl) return openGloss(GL[+gl.dataset.gl]);
   const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
   const a = b.dataset.act, c = st.cur;
   if (a === 'mode') ui.study = b.dataset.v === '1';
   else if (a === 'src') ui.src = b.dataset.v;
+  else if (a === 'weak') { ui.src = G ? 'g' : 'e'; ui.result = false; location.hash = 'exam'; return startExam((G ? 'r' : 's') + b.dataset.i); }
+  else if (a === 'e-todo') { ui.eTodo = b.dataset.v === '1'; ui.ei = 0; ui.eShow = ui.eHint = false; }
+  else if (a === 'e-hint') ui.eHint = !ui.eHint;
+  else if (a === 'e-show') ui.eShow = !ui.eShow;
+  else if (a === 'e-ok' || a === 'e-no' || a === 'e-next' || a === 'e-prev') {
+    const list = ES.filter(c => !ui.eTodo || !st.essay[c.id]), c = list[ui.ei];
+    if (a === 'e-ok') st.essay[c.id] = 1; else if (a === 'e-no') delete st.essay[c.id];
+    if (a === 'e-prev') ui.ei = (ui.ei - 1 + list.length) % list.length; else if (!(a === 'e-ok' && ui.eTodo)) ui.ei = (ui.ei + 1) % list.length;
+    ui.eShow = ui.eHint = false; save(); render(); return scrollTo(0, 0);
+  }
   else if (a === 'round') ui.round = b.dataset.v;
   else if (a === 'start') { if (view() !== 'exam') { location.hash = 'exam'; } ui.result = false; return startExam(b.dataset.m); }
   else if (a === 'show-last') ui.result = true;
@@ -541,18 +628,25 @@ app.addEventListener('click', e => {
   else if (a === 'unwrong') { delete st.wrong[b.dataset.id]; save(); }
   else if (a === 'reset-ask') ui.askReset = true;
   else if (a === 'reset-no') ui.askReset = false;
-  else if (a === 'reset-yes') { st = { known: {}, wrong: {}, hist: [], cur: null, last: null, hide: false }; ui.askReset = false; ui.deck = null; save(); }
+  else if (a === 'reset-yes') { st = fresh(); ui.askReset = false; ui.deck = null; save(); }
   else return;
   render();
 });
+app.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'essay-ans') { const list = ES.filter(c => !ui.eTodo || !st.essay[c.id]); if (list[ui.ei]) ui.drafts[list[ui.ei].id] = t.value; }
+  else if (t.id === 'note-q') { ui.q = t.value; $('#study-body').innerHTML = studyBody(); }
+});
 app.addEventListener('change', e => {
   const t = e.target;
-  if (t.dataset.known) { t.checked ? st.known[t.dataset.known] = 1 : delete st.known[t.dataset.known]; save(); }
+  if (t.id === 'dday') { st.dday = t.value; save(); render(); }
+  else if (t.dataset.known) { t.checked ? st.known[t.dataset.known] = 1 : delete st.known[t.dataset.known]; save(); }
   else if (t.dataset.actChange === 'fctodo') { ui.fcTodo = t.checked; buildDeck(); render(); }
 });
 addEventListener('keydown', e => {
   if (ui.sheet) { if (e.key === 'Escape') { ui.sheet = null; renderSheet(); } return; }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.ncard [data-k]')) { e.preventDefault(); return openDetail(e.target); }
+  if (e.target.matches && e.target.matches('input,textarea')) return;
   if (view() !== 'exam' || !st.cur || e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.key >= '1' && e.key <= '4') answer(+e.key - 1);
   else if (e.key === 'ArrowRight') move(1);
@@ -561,7 +655,7 @@ addEventListener('keydown', e => {
 addEventListener('hashchange', () => { ui.sheet = null; renderSheet(); ui.askSubmit = false; ui.askReset = false; render(); scrollTo(0, 0); });
 render();
 (window.__GICHUL ? Promise.resolve(window.__GICHUL) : fetch('gichul.json').then(r => { if (!r.ok) throw 0; return r.json(); }))
-  .then(g => { g.q.forEach(q => { q.g = 1; QN[q.id] = q; }); G = g; })
+  .then(g => { g.q.forEach(q => { q.g = 1; QN[q.id] = q; }); G = g; hotCache = null; })
   .catch(() => { G = false; if (ui.src === 'g') ui.src = 'e'; })
-  .then(() => { if (!ui.sheet) render(); });
+  .then(() => { const el = document.activeElement; if (!ui.sheet && !(el && /INPUT|TEXTAREA/.test(el.tagName))) render(); });
 </script>
